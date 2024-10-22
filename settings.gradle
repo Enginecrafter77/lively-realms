@@ -3,6 +3,11 @@ pluginManagement {
         mavenLocal()
         gradlePluginPortal()
         maven { url = 'https://maven.neoforged.net/releases' }
+        maven { url = 'https://maven.enginecrafter77.dev/general' }
+    }
+    plugins {
+        id 'net.neoforged.moddev' version '1.0.20'
+        id 'dev.enginecrafter77.gitversion' version '1.0.2'
     }
 }
 
