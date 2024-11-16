@@ -20,7 +20,7 @@ public class MinecraftStructureMap implements StructureMap {
 				.registerTerminal("jungle-planks", SingleBlockTerminal.of(Blocks.JUNGLE_PLANKS))
 				.registerTerminal("acacia-planks", SingleBlockTerminal.of(Blocks.ACACIA_PLANKS))
 				.registerNonterminal("planks-seq", MultiNonterminal.builder().add(CellPosition.ORIGIN, "planks").add(CellPosition.of(1, 0, 0), "planks-seq-or-epsilon").build())
-				.registerNonterminal("planks-seq-or-epsilon", AlternativeNonterminal.builder().or("planks-seq").orEpsilon().build())
+				.registerNonterminal("planks-seq-or-epsilon", AlternativeNonterminal.builder().or("planks-seq").orEpsilon().withSelector(WeightedRandomSelector.builder().withOption("planks-seq", 0.9).withEpsilon(0.1).build()).build())
 				.registerNonterminal("planks", AlternativeNonterminal.builder().either("oak-planks", "jungle-planks", "acacia-planks").build())
 				.alias("start", "planks-seq")
 				.build();

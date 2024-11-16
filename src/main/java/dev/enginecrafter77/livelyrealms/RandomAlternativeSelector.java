@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-public class RandomAlternativeSelector<T> implements AlternativeSelector<T> {
+public class RandomAlternativeSelector implements AlternativeSelector {
 	private final Random rng;
 
 	public RandomAlternativeSelector(Random rng)
@@ -13,11 +13,11 @@ public class RandomAlternativeSelector<T> implements AlternativeSelector<T> {
 	}
 
 	@Override
-	public T select(Collection<T> options, GrammarTermResolver resolver, StructureMap map, CellPosition position)
+	public String select(Collection<String> options, GrammarTermResolver resolver, StructureMap map, CellPosition position)
 	{
 		int count = options.size();
 		int index = this.rng.nextInt(count);
-		for(T item : options)
+		for(String item : options)
 		{
 			if(index-- == 0)
 				return item;
@@ -25,13 +25,13 @@ public class RandomAlternativeSelector<T> implements AlternativeSelector<T> {
 		throw new NoSuchElementException();
 	}
 
-	public static <T> RandomAlternativeSelector<T> with(Random rng)
+	public static RandomAlternativeSelector with(Random rng)
 	{
-		return new RandomAlternativeSelector<T>(rng);
+		return new RandomAlternativeSelector(rng);
 	}
 
-	public static <T> RandomAlternativeSelector<T> get()
+	public static RandomAlternativeSelector get()
 	{
-		return new RandomAlternativeSelector<T>(new Random());
+		return new RandomAlternativeSelector(new Random());
 	}
 }
