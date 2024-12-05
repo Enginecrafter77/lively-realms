@@ -1,7 +1,5 @@
 package dev.enginecrafter77.livelyrealms;
 
-import com.google.common.collect.ImmutableSet;
-import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 
@@ -10,16 +8,9 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -51,6 +42,7 @@ public class LivelyRealmsMod
 
     public static final DeferredBlock<BlockNonterminal> BLOCK_NONTERMINAL = BLOCKS.registerBlock("nonterminal", BlockNonterminal::new, BlockBehaviour.Properties.of());
     public static final DeferredItem<?> ITEM_BLOCK_NONTERMINAL = ITEMS.registerSimpleBlockItem(BLOCK_NONTERMINAL);
+    public static final DeferredItem<ItemGrammarWand> ITEM_GRAMMAR_WAND = ITEMS.registerItem("grammar_wand", ItemGrammarWand::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityNonterminal>> BLOCK_ENTITY_TYPE_NONTERMINAL = BLOCK_ENTITY_TYPES.register("nonterminal", () -> new BlockEntityType<BlockEntityNonterminal>(BlockEntityNonterminal::new, Set.of(BLOCK_NONTERMINAL.get()), null));
 
@@ -82,7 +74,10 @@ public class LivelyRealmsMod
     public void addCreative(BuildCreativeModeTabContentsEvent event)
     {
         if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES)
+        {
             event.accept(ITEM_BLOCK_NONTERMINAL);
+            event.accept(ITEM_GRAMMAR_WAND);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

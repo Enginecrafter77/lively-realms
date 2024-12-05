@@ -17,18 +17,6 @@ public class BlockNonterminal extends Block implements EntityBlock {
 		super(properties);
 	}
 
-	@Override
-	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult)
-	{
-		BlockEntityNonterminal entity = (BlockEntityNonterminal)level.getBlockEntity(pos);
-		if(entity != null)
-		{
-			entity.expand();
-			return InteractionResult.SUCCESS;
-		}
-		return InteractionResult.PASS;
-	}
-
 	@Nullable
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)

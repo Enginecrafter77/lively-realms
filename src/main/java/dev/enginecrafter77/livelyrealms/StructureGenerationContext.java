@@ -16,16 +16,24 @@ public class StructureGenerationContext {
 		this.cellSize = cellSize;
 	}
 
-	public void anchorCell(CellPosition position, Vector3i out)
+	public void getEnclosingCell(BlockPos pos, CellPosition cellOut)
 	{
-		position.anchor(this.cellSize, out);
+		cellOut.set(pos.getX(), pos.getY(), pos.getZ());
+		cellOut.sub(this.anchor.getX(), this.anchor.getY(), this.anchor.getZ());
+		cellOut.div(this.cellSize);
+	}
+
+	public void getCellAnchor(ReadableCellPosition position, Vector3i out)
+	{
+		out.set(position);
+		out.mul(this.cellSize);
 		out.add(this.anchor.getX(), this.anchor.getY(), this.anchor.getZ());
 	}
 
-	public BlockPos getAnchorBlockPos(CellPosition position)
+	public BlockPos getCellAnchorBlockPos(ReadableCellPosition position)
 	{
 		Vector3i out = new Vector3i();
-		this.anchorCell(position, out);
+		this.getCellAnchor(position, out);
 		return new BlockPos(out.x, out.y, out.z);
 	}
 }

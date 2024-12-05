@@ -1,80 +1,52 @@
 package dev.enginecrafter77.livelyrealms;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
 
-public class MinecraftStructureMap implements StructureMap {
+public class MinecraftStructureMap implements StructureMap, SymbolLattice, SymbolAcceptor {
 	public final StructureGenerationContext context;
-	public final GrammarRegistry registry;
+	public final Grammar grammar;
 
-	public MinecraftStructureMap(StructureGenerationContext context)
+	public MinecraftStructureMap(Grammar grammar, StructureGenerationContext context)
 	{
 		this.context = context;
-		this.registry = GrammarRegistry.builder()
-				.registerTerminal("grass", SingleBlockTerminal.of(Blocks.GRASS_BLOCK))
-				.registerTerminal("ironblock", SingleBlockTerminal.of(Blocks.IRON_BLOCK))
-				.registerTerminal("oak-planks", SingleBlockTerminal.of(Blocks.OAK_PLANKS))
-				.registerTerminal("jungle-planks", SingleBlockTerminal.of(Blocks.JUNGLE_PLANKS))
-				.registerTerminal("acacia-planks", SingleBlockTerminal.of(Blocks.ACACIA_PLANKS))
-				.registerNonterminal("planks-seq", MultiNonterminal.builder().add(CellPosition.ORIGIN, "planks").add(CellPosition.of(1, 0, 0), "planks-seq-or-epsilon").build())
-				.registerNonterminal("planks-seq-or-epsilon", AlternativeNonterminal.builder().or("planks-seq").orEpsilon().withSelector(WeightedRandomSelector.builder().withOption("planks-seq", 0.9).withEpsilon(0.1).build()).build())
-				.registerNonterminal("planks", AlternativeNonterminal.builder().either("oak-planks", "jungle-planks", "acacia-planks").build())
-				.alias("start", "planks-seq")
-				.build();
+		this.grammar = grammar;
 	}
 
 	@Override
-	public void addTerminal(CellPosition cell, GrammarTerminal terminal)
+	public void putSymbol(ReadableCellPosition position, GrammarSymbol symbol)
 	{
-		terminal.build(this.context, cell);
+		SymbolExpression expression = symbol.getExpression();
+		if(expression == null)
+			return;
+		expression.build(this.context, position);
 	}
 
+	@Nullable
 	@Override
-	public void addNonterminal(CellPosition cell, GrammarNonterminal nonterminal)
+	public GrammarSymbol getSymbol(ReadableCellPosition position)
 	{
-		BlockPos pos = this.context.getAnchorBlockPos(cell);
-		this.context.level.setBlockAndUpdate(pos, LivelyRealmsMod.BLOCK_NONTERMINAL.get().defaultBlockState());
-		BlockEntityNonterminal tile = (BlockEntityNonterminal)this.context.level.getBlockEntity(pos);
-		if(tile == null)
-			throw new IllegalStateException();
-		tile.cellPosition = cell;
-		tile.nonterminal = nonterminal;
-		tile.map = this;
-		tile.initialized = true;
-	}
-
-	@Override
-	public Optional<GrammarTerminal> getTerminalAt(CellPosition position)
-	{
-		//return Optional.ofNullable(this.cells.get(position)).flatMap(CellMemberHolder::getTerminal);
-		return Optional.empty();
-	}
-
-	@Override
-	public Optional<GrammarNonterminal> getNonterminalAt(CellPosition position)
-	{
-		BlockPos pos = this.context.getAnchorBlockPos(position);
-		BlockState state = this.context.level.getBlockState(pos);
-		if(state.getBlock() != LivelyRealmsMod.BLOCK_NONTERMINAL.get())
-			return Optional.empty();
-		BlockEntityNonterminal nonterminal = (BlockEntityNonterminal)this.context.level.getBlockEntity(pos);
-		if(nonterminal == null)
-			return Optional.empty();
-		return Optional.of(nonterminal.nonterminal);
-	}
-
-	public Optional<GrammarTerminal> expand(CellPosition position)
-	{
-		Optional<GrammarNonterminal> nonterminal = this.getNonterminalAt(position);
-		while(nonterminal.isPresent())
+		BlockPos pos = this.context.getCellAnchorBlockPos(position);
+		Block block = this.context.level.getBlockState(pos).getBlock();
+		if(block == LivelyRealmsMod.BLOCK_NONTERMINAL.get())
 		{
-			this.context.level.setBlockAndUpdate(this.context.getAnchorBlockPos(position), Blocks.AIR.defaultBlockState());
-			nonterminal.get().expand(this.registry, this, position);
-			nonterminal = this.getNonterminalAt(position);
+			BlockEntityNonterminal tile = (BlockEntityNonterminal)this.context.level.getBlockEntity(pos);
+			if(tile == null)
+				return null;
+			return this.grammar.symbols.get(tile.symbol);
 		}
-		return this.getTerminalAt(position);
+		if(block == Blocks.AIR)
+			return EpsilonSymbol.INSTANCE;
+		return this.grammar.symbols.get(BuiltInRegistries.BLOCK.getKey(block).toString());
+	}
+
+	@Override
+	public void acceptSymbol(ReadableCellPosition cell, String symbol)
+	{
+		this.putSymbol(cell, this.grammar.symbols.getOrDefault(symbol, EpsilonSymbol.INSTANCE));
 	}
 }

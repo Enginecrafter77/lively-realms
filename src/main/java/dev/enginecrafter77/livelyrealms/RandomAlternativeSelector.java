@@ -13,7 +13,7 @@ public class RandomAlternativeSelector implements AlternativeSelector {
 	}
 
 	@Override
-	public String select(Collection<String> options, GrammarTermResolver resolver, StructureMap map, CellPosition position)
+	public String select(Collection<String> options, GrammarContext context, CellPosition position)
 	{
 		int count = options.size();
 		int index = this.rng.nextInt(count);

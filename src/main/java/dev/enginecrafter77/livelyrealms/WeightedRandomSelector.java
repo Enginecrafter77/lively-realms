@@ -14,7 +14,7 @@ public class WeightedRandomSelector implements AlternativeSelector {
 	}
 
 	@Override
-	public String select(Collection<String> options, GrammarTermResolver resolver, StructureMap map, CellPosition position)
+	public String select(Collection<String> options, GrammarContext context, CellPosition position)
 	{
 		double num = this.rng.nextDouble();
 		return this.weightVector.at(num).getItem();
@@ -44,7 +44,7 @@ public class WeightedRandomSelector implements AlternativeSelector {
 
 		public WeightedRandomSelectorBuilder withEpsilon(double weight)
 		{
-			return this.withOption(GrammarTermResolver.EPSILON, weight);
+			return this.withOption(GrammarSymbol.EPSILON, weight);
 		}
 
 		public WeightedRandomSelectorBuilder withRng(Random rng)

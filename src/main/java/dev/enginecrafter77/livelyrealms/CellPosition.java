@@ -1,9 +1,8 @@
 package dev.enginecrafter77.livelyrealms;
 
-import org.checkerframework.checker.units.qual.C;
 import org.joml.Vector3i;
 
-public class CellPosition extends Vector3i {
+public class CellPosition extends Vector3i implements ReadableCellPosition {
 	public static final CellPosition ORIGIN = new CellPosition(0, 0, 0);
 
 	public CellPosition(int x, int y, int z)
@@ -24,6 +23,11 @@ public class CellPosition extends Vector3i {
 	public CellPosition copy()
 	{
 		return new CellPosition(this);
+	}
+
+	public ImmutableCellPosition freeze()
+	{
+		return new ImmutableCellPosition(this);
 	}
 
 	public void getPosition(Vector3i dest)
