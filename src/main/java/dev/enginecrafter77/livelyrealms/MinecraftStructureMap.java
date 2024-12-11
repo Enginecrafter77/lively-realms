@@ -7,46 +7,48 @@ import net.minecraft.world.level.block.Blocks;
 
 import javax.annotation.Nullable;
 
-public class MinecraftStructureMap implements StructureMap, SymbolLattice, SymbolAcceptor {
-	public final StructureGenerationContext context;
+public class MinecraftStructureMap implements GrammarContext, SymbolLattice, SymbolAcceptor {
+	public static final String EPSILON = "epsilon";
+
+	public final SymbolExpressionContext expressionContext;
 	public final Grammar grammar;
 
-	public MinecraftStructureMap(Grammar grammar, StructureGenerationContext context)
+	public MinecraftStructureMap(Grammar grammar, SymbolExpressionContext context)
 	{
-		this.context = context;
+		this.expressionContext = context;
 		this.grammar = grammar;
 	}
 
 	@Override
-	public void putSymbol(ReadableCellPosition position, GrammarSymbol symbol)
+	public SymbolLattice getEnvironment()
 	{
-		SymbolExpression expression = symbol.getExpression();
-		if(expression == null)
-			return;
-		expression.build(this.context, position);
+		return this;
 	}
 
 	@Nullable
 	@Override
-	public GrammarSymbol getSymbol(ReadableCellPosition position)
+	public String getSymbolAt(ReadableCellPosition position)
 	{
-		BlockPos pos = this.context.getCellAnchorBlockPos(position);
-		Block block = this.context.level.getBlockState(pos).getBlock();
+		BlockPos pos = this.expressionContext.getCellAnchorBlockPos(position);
+		Block block = this.expressionContext.getLevel().getBlockState(pos).getBlock();
 		if(block == LivelyRealmsMod.BLOCK_NONTERMINAL.get())
 		{
-			BlockEntityNonterminal tile = (BlockEntityNonterminal)this.context.level.getBlockEntity(pos);
+			BlockEntityNonterminal tile = (BlockEntityNonterminal)this.expressionContext.getLevel().getBlockEntity(pos);
 			if(tile == null)
 				return null;
-			return this.grammar.symbols.get(tile.symbol);
+			return tile.symbol;
 		}
 		if(block == Blocks.AIR)
-			return EpsilonSymbol.INSTANCE;
-		return this.grammar.symbols.get(BuiltInRegistries.BLOCK.getKey(block).toString());
+			return EPSILON;
+		return BuiltInRegistries.BLOCK.getKey(block).toString();
 	}
 
 	@Override
 	public void acceptSymbol(ReadableCellPosition cell, String symbol)
 	{
-		this.putSymbol(cell, this.grammar.symbols.getOrDefault(symbol, EpsilonSymbol.INSTANCE));
+		SymbolExpression expression = this.expressionContext.getExpressionProvider().getExpression(symbol);
+		if(expression == null)
+			return;
+		expression.build(this.expressionContext, cell);
 	}
 }

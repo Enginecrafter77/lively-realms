@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.Blocks;
 public class ItemGrammarWand extends Item {
 	private static StructureGenerationContext ctx = null;
 	private static Grammar grammar = null;
+	private static SymbolExpressionProvider symbols = null;
 
 	public ItemGrammarWand(Properties properties)
 	{
@@ -20,28 +21,21 @@ public class ItemGrammarWand extends Item {
 		if(context.getLevel().isClientSide)
 			return InteractionResult.PASS;
 
-		if(context.getPlayer().isCrouching())
+		if(ctx == null)
 		{
-			if(ctx == null)
-				ctx = new StructureGenerationContext(context.getLevel(), context.getClickedPos(), 1);
-			else
-				ctx = null;
+			ctx = new StructureGenerationContext(context.getLevel(), context.getClickedPos(), getSymbols());
 			return InteractionResult.SUCCESS;
 		}
 
-		if(ctx == null)
-			return InteractionResult.FAIL;
 		Grammar grammar = getGrammar();
 		MinecraftStructureMap map = new MinecraftStructureMap(grammar, ctx);
 		CellPosition cell = new CellPosition();
 		ctx.getEnclosingCell(context.getClickedPos(), cell);
 
-		GrammarContext grammarContext = new GrammarContext(map);
-
-		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(grammarContext, cell)).findFirst().orElse(null);
+		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)
 			return InteractionResult.FAIL;
-		rule.apply(map, grammarContext, cell);
+		rule.apply(map, map, cell);
 
 		return InteractionResult.SUCCESS;
 	}
@@ -53,43 +47,50 @@ public class ItemGrammarWand extends Item {
 		return grammar;
 	}
 
+	public static SymbolExpressionProvider getSymbols()
+	{
+		if(symbols == null)
+			symbols = createSymbols();
+		return symbols;
+	}
+
+	public static SymbolExpressionProvider createSymbols()
+	{
+		return SymbolExpressionRegistry.builder()
+				.withCellSize(1)
+				.express("minecraft:iron_block", SingleBlockExpression.of(Blocks.IRON_BLOCK))
+				.express("minecraft:gold_block", SingleBlockExpression.of(Blocks.GOLD_BLOCK))
+				.express("minecraft:copper_block", SingleBlockExpression.of(Blocks.COPPER_BLOCK)) // Hub3-
+				.express("minecraft:red_wool", SingleBlockExpression.of(Blocks.RED_WOOL)) // X-
+				.express("minecraft:blue_wool", SingleBlockExpression.of(Blocks.BLUE_WOOL)) // X+
+				.express("minecraft:yellow_wool", SingleBlockExpression.of(Blocks.YELLOW_WOOL))
+				.express("minecraft:cobblestone_wall", SingleBlockExpression.of(Blocks.COBBLESTONE_WALL))
+				.build();
+	}
+
 	public static Grammar createGrammar()
 	{
 		return Grammar.builder()
-				.withEpsilon()
-				.withExpressedSymbol("minecraft:iron_block", SingleBlockExpression.of(Blocks.IRON_BLOCK)) // Hub4
-				.withExpressedSymbol("minecraft:gold_block", SingleBlockExpression.of(Blocks.GOLD_BLOCK)) // Hub3+
-				.withExpressedSymbol("minecraft:copper_block", SingleBlockExpression.of(Blocks.COPPER_BLOCK)) // Hub3-
-				.withExpressedSymbol("minecraft:red_wool", SingleBlockExpression.of(Blocks.RED_WOOL)) // X-
-				.withExpressedSymbol("minecraft:blue_wool", SingleBlockExpression.of(Blocks.BLUE_WOOL)) // X+
-				.withExpressedSymbol("minecraft:yellow_wool", SingleBlockExpression.of(Blocks.YELLOW_WOOL))
-				.withExpressedSymbol("minecraft:cobblestone_wall", SingleBlockExpression.of(Blocks.COBBLESTONE_WALL))
-				.withAbstractSymbol("start")
-				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "start")
-						.put(CellPosition.ORIGIN, "minecraft:iron_block")
-						.build()
-				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(1, 0, 0), GrammarSymbol.EPSILON)
-						.match(CellPosition.of(-1, 0, 0), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(1, 0, 0), MinecraftStructureMap.EPSILON)
+						.match(CellPosition.of(-1, 0, 0), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.of(-1, 0, 0), "minecraft:red_wool")
 						.put(CellPosition.of(1, 0, 0), "minecraft:blue_wool")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, 1), GrammarSymbol.EPSILON)
-						.match(CellPosition.of(0, 0, 2), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(0, 0, 1), MinecraftStructureMap.EPSILON)
+						.match(CellPosition.of(0, 0, 2), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.of(0, 0, 1), "minecraft:yellow_wool")
 						.put(CellPosition.of(0, 0, 2), "minecraft:iron_block")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, -1), GrammarSymbol.EPSILON)
-						.match(CellPosition.of(0, 0, -2), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(0, 0, -1), MinecraftStructureMap.EPSILON)
+						.match(CellPosition.of(0, 0, -2), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.of(0, 0, -1), "minecraft:yellow_wool")
 						.put(CellPosition.of(0, 0, -2), "minecraft:iron_block")
 						.build()
@@ -115,27 +116,27 @@ public class ItemGrammarWand extends Item {
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:red_wool")
-						.match(CellPosition.of(-1, 0, 0), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(-1, 0, 0), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.ORIGIN, "minecraft:red_wool")
 						.put(CellPosition.of(-1, 0, 0), "minecraft:red_wool")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:blue_wool")
-						.match(CellPosition.of(1, 0, 0), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(1, 0, 0), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.ORIGIN, "minecraft:blue_wool")
 						.put(CellPosition.of(1, 0, 0), "minecraft:blue_wool")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:yellow_wool")
-						.match(CellPosition.of(0, 1, 0), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(0, 1, 0), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.of(0, 1, 0), "minecraft:cobblestone_wall")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
 						.match(CellPosition.ORIGIN, "minecraft:cobblestone_wall")
-						.match(CellPosition.of(0, 1, 0), GrammarSymbol.EPSILON)
+						.match(CellPosition.of(0, 1, 0), MinecraftStructureMap.EPSILON)
 						.put(CellPosition.of(0, 1, 0), "minecraft:cobblestone_wall")
 						.build()
 				)

@@ -42,11 +42,6 @@ public class WeightedRandomSelector implements AlternativeSelector {
 			return this;
 		}
 
-		public WeightedRandomSelectorBuilder withEpsilon(double weight)
-		{
-			return this.withOption(GrammarSymbol.EPSILON, weight);
-		}
-
 		public WeightedRandomSelectorBuilder withRng(Random rng)
 		{
 			this.rng = rng;

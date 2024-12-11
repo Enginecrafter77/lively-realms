@@ -12,9 +12,9 @@ public class SingleBlockExpression implements SymbolExpression {
 	}
 
 	@Override
-	public void build(StructureGenerationContext context, ReadableCellPosition position)
+	public void build(SymbolExpressionContext context, ReadableCellPosition position)
 	{
-		context.level.setBlockAndUpdate(context.getCellAnchorBlockPos(position), this.block);
+		context.getLevel().setBlockAndUpdate(context.getCellAnchorBlockPos(position), this.block);
 	}
 
 	@Override
