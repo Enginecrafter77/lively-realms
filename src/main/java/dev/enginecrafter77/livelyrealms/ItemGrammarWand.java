@@ -3,12 +3,16 @@ package dev.enginecrafter77.livelyrealms;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.block.Blocks;
+
+import java.io.File;
 
 public class ItemGrammarWand extends Item {
+	private static final String EPSILON = VirtualStructureMap.EPSILON;
+	private static final VirtualStructureMap map = new VirtualStructureMap();
+
 	private static StructureGenerationContext ctx = null;
-	private static Grammar grammar = null;
 	private static SymbolExpressionProvider symbols = null;
+	private static Grammar grammar = null;
 
 	public ItemGrammarWand(Properties properties)
 	{
@@ -24,18 +28,20 @@ public class ItemGrammarWand extends Item {
 		if(ctx == null)
 		{
 			ctx = new StructureGenerationContext(context.getLevel(), context.getClickedPos(), getSymbols());
-			return InteractionResult.SUCCESS;
+			CellPosition position = new CellPosition();
+			ctx.getEnclosingCell(context.getClickedPos(), position);
+			map.acceptSymbol(position, "start");
 		}
 
 		Grammar grammar = getGrammar();
-		MinecraftStructureMap map = new MinecraftStructureMap(grammar, ctx);
 		CellPosition cell = new CellPosition();
 		ctx.getEnclosingCell(context.getClickedPos(), cell);
 
 		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)
 			return InteractionResult.FAIL;
-		rule.apply(map, map, cell);
+		SymbolExpressingAcceptorAdapter adapter = new SymbolExpressingAcceptorAdapter(map, ctx);
+		rule.apply(adapter, map, cell);
 
 		return InteractionResult.SUCCESS;
 	}
@@ -57,14 +63,10 @@ public class ItemGrammarWand extends Item {
 	public static SymbolExpressionProvider createSymbols()
 	{
 		return SymbolExpressionRegistry.builder()
-				.withCellSize(1)
-				.express("minecraft:iron_block", SingleBlockExpression.of(Blocks.IRON_BLOCK))
-				.express("minecraft:gold_block", SingleBlockExpression.of(Blocks.GOLD_BLOCK))
-				.express("minecraft:copper_block", SingleBlockExpression.of(Blocks.COPPER_BLOCK)) // Hub3-
-				.express("minecraft:red_wool", SingleBlockExpression.of(Blocks.RED_WOOL)) // X-
-				.express("minecraft:blue_wool", SingleBlockExpression.of(Blocks.BLUE_WOOL)) // X+
-				.express("minecraft:yellow_wool", SingleBlockExpression.of(Blocks.YELLOW_WOOL))
-				.express("minecraft:cobblestone_wall", SingleBlockExpression.of(Blocks.COBBLESTONE_WALL))
+				.withCellSize(8)
+				.express("hall4", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-hub4.json"))))
+				.express("hallZ", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-straight-z.json"))))
+				.express("hallX", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-straight-x.json"))))
 				.build();
 	}
 
@@ -72,72 +74,44 @@ public class ItemGrammarWand extends Item {
 	{
 		return Grammar.builder()
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(1, 0, 0), MinecraftStructureMap.EPSILON)
-						.match(CellPosition.of(-1, 0, 0), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.of(-1, 0, 0), "minecraft:red_wool")
-						.put(CellPosition.of(1, 0, 0), "minecraft:blue_wool")
+						.match(CellPosition.ORIGIN, "start")
+						.put(CellPosition.ORIGIN, "hall4")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, 1), MinecraftStructureMap.EPSILON)
-						.match(CellPosition.of(0, 0, 2), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.of(0, 0, 1), "minecraft:yellow_wool")
-						.put(CellPosition.of(0, 0, 2), "minecraft:iron_block")
+						.match(CellPosition.ORIGIN, "hall4")
+						.match(CellPosition.of(1, 0, 0), EPSILON)
+						.match(CellPosition.of(-1, 0, 0), EPSILON)
+						.put(CellPosition.of(-1, 0, 0), "hallX")
+						.put(CellPosition.of(1, 0, 0), "hallX")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, -1), MinecraftStructureMap.EPSILON)
-						.match(CellPosition.of(0, 0, -2), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.of(0, 0, -1), "minecraft:yellow_wool")
-						.put(CellPosition.of(0, 0, -2), "minecraft:iron_block")
+						.match(CellPosition.ORIGIN, "hall4")
+						.match(CellPosition.of(0, 0, 1), EPSILON)
+						.match(CellPosition.of(0, 0, 2), EPSILON)
+						.put(CellPosition.of(0, 0, 1), "hallZ")
+						.put(CellPosition.of(0, 0, 2), "hall4")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, 1), "minecraft:yellow_wool")
-						.match(CellPosition.of(0, 0, -1), "minecraft:yellow_wool")
-						.identity()
+						.match(CellPosition.ORIGIN, "hall4")
+						.match(CellPosition.of(0, 0, -1), EPSILON)
+						.match(CellPosition.of(0, 0, -2), EPSILON)
+						.put(CellPosition.of(0, 0, -1), "hallZ")
+						.put(CellPosition.of(0, 0, -2), "hall4")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, 1), "minecraft:yellow_wool")
-						.put(CellPosition.ORIGIN, "minecraft:copper_block")
+						.match(CellPosition.ORIGIN, "hallX")
+						.match(CellPosition.of(-1, 0, 0), EPSILON)
+						.put(CellPosition.of(-1, 0, 0), "hallX")
 						.build()
 				)
 				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:iron_block")
-						.match(CellPosition.of(0, 0, -1), "minecraft:yellow_wool")
-						.put(CellPosition.ORIGIN, "minecraft:gold_block")
-						.build()
-				)
-				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:red_wool")
-						.match(CellPosition.of(-1, 0, 0), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.ORIGIN, "minecraft:red_wool")
-						.put(CellPosition.of(-1, 0, 0), "minecraft:red_wool")
-						.build()
-				)
-				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:blue_wool")
-						.match(CellPosition.of(1, 0, 0), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.ORIGIN, "minecraft:blue_wool")
-						.put(CellPosition.of(1, 0, 0), "minecraft:blue_wool")
-						.build()
-				)
-				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:yellow_wool")
-						.match(CellPosition.of(0, 1, 0), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.of(0, 1, 0), "minecraft:cobblestone_wall")
-						.build()
-				)
-				.withRule(SubstitutionRule.builder()
-						.match(CellPosition.ORIGIN, "minecraft:cobblestone_wall")
-						.match(CellPosition.of(0, 1, 0), MinecraftStructureMap.EPSILON)
-						.put(CellPosition.of(0, 1, 0), "minecraft:cobblestone_wall")
+						.match(CellPosition.ORIGIN, "hallX")
+						.match(CellPosition.of(1, 0, 0), EPSILON)
+						.put(CellPosition.of(1, 0, 0), "hallX")
 						.build()
 				)
 				.build();
