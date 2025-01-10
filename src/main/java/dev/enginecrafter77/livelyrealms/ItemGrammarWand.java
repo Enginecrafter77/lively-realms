@@ -5,6 +5,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 
 import java.io.File;
+import java.io.IOException;
+import java.sql.Struct;
 
 public class ItemGrammarWand extends Item {
 	private static final String EPSILON = VirtualStructureMap.EPSILON;
@@ -62,12 +64,18 @@ public class ItemGrammarWand extends Item {
 
 	public static SymbolExpressionProvider createSymbols()
 	{
-		return SymbolExpressionRegistry.builder()
-				.withCellSize(8)
-				.express("hall4", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-hub4.json"))))
-				.express("hallZ", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-straight-z.json"))))
-				.express("hallX", MultiblockExpression.of(PalettedStructure.fromJson(new File("hall-straight-x.json"))))
-				.build();
+		try
+		{
+			LitematicaStructureLoader loader = new LitematicaStructureLoader();
+			Structure hub4 = loader.load(new File("lr-hub4.litematic").toPath());
+			Structure hallX = loader.load(new File("lr-hallx.litematic").toPath());
+			Structure hallZ = loader.load(new File("lr-hallz.litematic").toPath());
+			return SymbolExpressionRegistry.builder().withCellSize(8).express("hall4", MultiblockExpression.of(hub4)).express("hallZ", MultiblockExpression.of(hallZ)).express("hallX", MultiblockExpression.of(hallX)).build();
+		}
+		catch(IOException exc)
+		{
+			throw new RuntimeException(exc);
+		}
 	}
 
 	public static Grammar createGrammar()
