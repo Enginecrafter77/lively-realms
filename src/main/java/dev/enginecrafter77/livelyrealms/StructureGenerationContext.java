@@ -2,6 +2,7 @@ package dev.enginecrafter77.livelyrealms;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import org.joml.Vector3d;
 import org.joml.Vector3i;
 
 public class StructureGenerationContext implements SymbolExpressionContext {
@@ -31,9 +32,12 @@ public class StructureGenerationContext implements SymbolExpressionContext {
 	@Override
 	public void getEnclosingCell(BlockPos pos, CellPosition cellOut)
 	{
-		cellOut.set(pos.getX(), pos.getY(), pos.getZ());
-		cellOut.sub(this.anchor.getX(), this.anchor.getY(), this.anchor.getZ());
-		cellOut.div(this.provider.getCellSize());
+		Vector3d dv = new Vector3d();
+		dv.set(pos.getX(), pos.getY(), pos.getZ());
+		dv.sub(this.anchor.getX(), this.anchor.getY(), this.anchor.getZ());
+		dv.div(this.provider.getCellSize());
+		dv.floor();
+		cellOut.set(dv);
 	}
 
 	@Override
