@@ -29,6 +29,11 @@ public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
 		return this.overrides.keySet();
 	}
 
+	public ReducedSymbolLatticeBuilder edit()
+	{
+		return ReducedSymbolLattice.builder().copy(this);
+	}
+
 	public static ReducedSymbolLatticeBuilder builder()
 	{
 		return new ReducedSymbolLatticeBuilder();

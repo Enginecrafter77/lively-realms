@@ -5,6 +5,7 @@ import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpressi
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressingAcceptorAdapter;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionProvider;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
+import dev.enginecrafter77.livelyrealms.generation.lattice.LatticeSymbolAcceptor;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaStructureLoader;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.world.InteractionResult;
@@ -15,8 +16,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class ItemGrammarWand extends Item {
-	private static final String EPSILON = VirtualStructureMap.EPSILON;
-	private static final VirtualStructureMap map = new VirtualStructureMap();
+	private static final String EPSILON = "epsilon";
+	private static final VirtualStructureMap map = new VirtualStructureMap(EPSILON);
 
 	private static StructureGenerationContext ctx = null;
 	private static SymbolExpressionProvider symbols = null;
@@ -38,7 +39,7 @@ public class ItemGrammarWand extends Item {
 			ctx = new StructureGenerationContext(context.getLevel(), context.getClickedPos(), getSymbols());
 			CellPosition position = new CellPosition();
 			ctx.getEnclosingCell(context.getClickedPos(), position);
-			map.acceptSymbol(position, "start");
+			map.setSymbolAt(position, "start");
 		}
 
 		Grammar grammar = getGrammar();
@@ -48,8 +49,11 @@ public class ItemGrammarWand extends Item {
 		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)
 			return InteractionResult.FAIL;
-		SymbolExpressingAcceptorAdapter adapter = new SymbolExpressingAcceptorAdapter(map, ctx);
-		rule.apply(adapter, map, cell);
+		SymbolAcceptor acceptor = CompositeSymbolAcceptor.builder()
+				.with(SymbolExpressingAcceptorAdapter.on(ctx))
+				.with(LatticeSymbolAcceptor.to(map))
+				.build();
+		rule.apply(acceptor, map, cell);
 
 		return InteractionResult.SUCCESS;
 	}

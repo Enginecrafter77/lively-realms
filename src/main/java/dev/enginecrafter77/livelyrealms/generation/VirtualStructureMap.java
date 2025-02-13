@@ -1,26 +1,23 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
+import dev.enginecrafter77.livelyrealms.generation.lattice.MutableSparseSymbolLattice;
+import dev.enginecrafter77.livelyrealms.generation.lattice.MutableSymbolLattice;
 import dev.enginecrafter77.livelyrealms.generation.lattice.SymbolLattice;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.Nonnull;
+import java.util.Objects;
 
-public class VirtualStructureMap implements SymbolLattice, GrammarContext, SymbolAcceptor {
-	public static final String EPSILON = "eps";
+public class VirtualStructureMap implements GrammarContext, MutableSymbolLattice {
+	private final MutableSparseSymbolLattice lattice;
 
-	private final Map<ReadableCellPosition, String> symbols;
+	@Nonnull
+	private final String epsilon;
 
-	public VirtualStructureMap()
+	public VirtualStructureMap(@Nonnull String epsilon)
 	{
-		this.symbols = new HashMap<ReadableCellPosition, String>();
-	}
-
-	@Nullable
-	@Override
-	public String getSymbolAt(ReadableCellPosition position)
-	{
-		return this.symbols.getOrDefault(ImmutableCellPosition.copyOf(position), EPSILON);
+		this.lattice = new MutableSparseSymbolLattice();
+		this.epsilon = epsilon;
 	}
 
 	@Override
@@ -30,8 +27,21 @@ public class VirtualStructureMap implements SymbolLattice, GrammarContext, Symbo
 	}
 
 	@Override
-	public void acceptSymbol(ReadableCellPosition cell, String symbol)
+	public void setSymbolAt(ReadableCellPosition position, @Nullable String symbol)
 	{
-		this.symbols.put(ImmutableCellPosition.copyOf(cell), symbol);
+		if(symbol == null)
+			return;
+		if(Objects.equals(symbol, this.epsilon))
+			symbol = null;
+		this.lattice.setSymbolAt(position, symbol);
+	}
+
+	@Override
+	public @Nullable String getSymbolAt(ReadableCellPosition position)
+	{
+		String symbol = this.lattice.getSymbolAt(position);
+		if(symbol == null)
+			return this.epsilon;
+		return symbol;
 	}
 }
