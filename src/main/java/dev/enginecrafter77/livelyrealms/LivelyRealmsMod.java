@@ -1,5 +1,8 @@
 package dev.enginecrafter77.livelyrealms;
 
+import dev.enginecrafter77.livelyrealms.blocks.BlockEntityNonterminal;
+import dev.enginecrafter77.livelyrealms.blocks.BlockNonterminal;
+import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.slf4j.Logger;
 
