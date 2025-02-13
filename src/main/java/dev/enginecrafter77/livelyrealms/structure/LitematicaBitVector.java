@@ -41,8 +41,9 @@ public class LitematicaBitVector implements IntIterable, INBTSerializable<LongAr
 
     private void checkValueRange(int value)
     {
-        if(value < 0 || value > (int)Math.pow(10, this.bitsPerEntry))
-            throw new IllegalArgumentException();
+        int max = (int)Math.pow(2, this.bitsPerEntry);
+        if(value < 0 || value >= max)
+            throw new IllegalArgumentException(String.format("LitematicaBitVector can contain only values 0 <= x < %d. Value %d does not satisfy that range.", max, value));
     }
 
     public void set(int index, int value)
