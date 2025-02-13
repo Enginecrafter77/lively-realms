@@ -7,13 +7,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
-public class MutableSparseSymbolLattice implements MutableSymbolLattice {
+public class MutableSparseSymbolLattice extends EnumerableSymbolLattice implements MutableSymbolLattice {
 	private final Map<ReadableCellPosition, @NonNull String> symbolMap;
 
 	public MutableSparseSymbolLattice()
 	{
 		this.symbolMap = new HashMap<ReadableCellPosition, String>();
+	}
+
+	@Override
+	public Set<? extends ReadableCellPosition> getPositions()
+	{
+		return this.symbolMap.keySet();
 	}
 
 	@Override

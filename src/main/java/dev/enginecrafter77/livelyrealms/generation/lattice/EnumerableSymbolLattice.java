@@ -1,5 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation.lattice;
 
+import com.google.common.base.Predicates;
 import dev.enginecrafter77.livelyrealms.generation.CellPosition;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 import org.jetbrains.annotations.NotNull;
@@ -7,9 +8,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public abstract class EnumerableSymbolLattice implements SymbolLattice, Iterable<LatticeCell> {
 	public abstract Set<? extends ReadableCellPosition> getPositions();
+
+	public Set<String> getPalette()
+	{
+		return this.getPositions().stream().map(this::getSymbolAt).filter(Predicates.notNull()).collect(Collectors.toSet());
+	}
 
 	@NotNull
 	@Override
