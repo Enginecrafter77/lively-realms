@@ -1,6 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation.expression;
 
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -15,7 +16,7 @@ public class SingleBlockExpression implements SymbolExpression {
 	@Override
 	public void build(SymbolExpressionContext context, ReadableCellPosition position)
 	{
-		context.getLevel().setBlockAndUpdate(context.getCellAnchorBlockPos(position), this.block);
+		context.getLevel().setBlockAndUpdate(context.getBlockPositionInsideCell(position, BlockPos.ZERO), this.block);
 	}
 
 	@Override

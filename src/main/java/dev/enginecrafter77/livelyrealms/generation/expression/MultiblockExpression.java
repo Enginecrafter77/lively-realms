@@ -16,22 +16,21 @@ public class MultiblockExpression implements SymbolExpression {
 	@Override
 	public void build(SymbolExpressionContext context, ReadableCellPosition position)
 	{
-		BlockPos.MutableBlockPos bps = new BlockPos.MutableBlockPos();
-		BlockPos anchor = context.getCellAnchorBlockPos(position);
-		int cellSize = context.getExpressionProvider().getCellSize();
+		int cellSize = context.getGenerationProfile().expressionProvider().getCellSize();
 
-		Vector3i pos = new Vector3i();
-		for(pos.y = 0; pos.y < cellSize; ++pos.y)
+		Vector3i cellPosition = new Vector3i();
+		Vector3i absolutePosition = new Vector3i();
+		BlockPos.MutableBlockPos absoluteBlockPosition = new BlockPos.MutableBlockPos();
+		for(cellPosition.y = 0; cellPosition.y < cellSize; ++cellPosition.y)
 		{
-			for(pos.z = 0; pos.z < cellSize; ++pos.z)
+			for(cellPosition.z = 0; cellPosition.z < cellSize; ++cellPosition.z)
 			{
-				for(pos.x = 0; pos.x < cellSize; ++pos.x)
+				for(cellPosition.x = 0; cellPosition.x < cellSize; ++cellPosition.x)
 				{
-					bps.set(anchor);
-					bps.move(pos.x, pos.y, pos.z);
-
-					Structure.StructureBlock structureBlock = this.struct.getBlockAt(pos);
-					context.getLevel().setBlockAndUpdate(bps, structureBlock.getBlockState());
+					context.getPositionInsideCell(position, cellPosition, absolutePosition);
+					absoluteBlockPosition.set(absolutePosition.x, absolutePosition.y, absolutePosition.z);
+					Structure.StructureBlock structureBlock = this.struct.getBlockAt(cellPosition);
+					context.getLevel().setBlockAndUpdate(absoluteBlockPosition, structureBlock.getBlockState());
 				}
 			}
 		}

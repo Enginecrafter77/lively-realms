@@ -14,7 +14,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class MinecraftStructureMap implements GrammarContext, INBTSerializable<CompoundTag> {
+public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, INBTSerializable<CompoundTag> {
 	public static final String EPSILON = "epsilon";
 
 	private final Level level;
@@ -67,11 +67,12 @@ public class MinecraftStructureMap implements GrammarContext, INBTSerializable<C
 	public StructureGenerationContext getContext()
 	{
 		if(this.structureGenerationContext == null)
-			this.structureGenerationContext = new StructureGenerationContext(this.level, this.anchor, this.getGenerationProfile().expressionProvider());
+			this.structureGenerationContext = new StructureGenerationContext(this.level, this.anchor, this.getGenerationProfile());
 		return this.structureGenerationContext;
 	}
 
 	@Nonnull
+	@Override
 	public GenerationProfile getGenerationProfile()
 	{
 		return LivelyRealmsMod.GENERATION_PROFILE_REGISTRY.getOptional(this.profileName).orElseThrow();

@@ -15,7 +15,7 @@ public class SymbolExpressingAcceptorAdapter implements SymbolAcceptor {
 	@Override
 	public void acceptSymbol(ReadableCellPosition cell, String symbol)
 	{
-		SymbolExpression expression = this.context.getExpressionProvider().getExpression(symbol);
+		SymbolExpression expression = this.context.getGenerationProfile().expressionProvider().getExpression(symbol);
 		if(expression != null)
 			expression.build(this.context, cell);
 	}
