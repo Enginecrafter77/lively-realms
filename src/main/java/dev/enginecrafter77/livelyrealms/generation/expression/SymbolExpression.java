@@ -1,7 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation.expression;
 
-import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
+import dev.enginecrafter77.livelyrealms.generation.plan.StructureBuildPlan;
 
 public interface SymbolExpression {
-	public void build(SymbolExpressionContext context, ReadableCellPosition position);
+	public StructureBuildPlan getBuildPlan();
 }

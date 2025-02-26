@@ -14,12 +14,14 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, INBTSerializable<CompoundTag> {
+public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, CellMutationContext, INBTSerializable<CompoundTag> {
 	public static final String EPSILON = "epsilon";
 
 	private final Level level;
 
 	private final VirtualStructureMap symbolMap;
+
+	private final MapTaskTracker taskTracker;
 
 	@Nonnull
 	private UUID id;
@@ -35,6 +37,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 
 	public MinecraftStructureMap(Level level)
 	{
+		this.taskTracker = new MapTaskTracker(this);
 		this.id = UUID.randomUUID();
 		this.level = level;
 		this.anchor = BlockPos.ZERO;
@@ -58,13 +61,20 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		return this.anchor;
 	}
 
+	public MapTaskTracker getTaskTracker()
+	{
+		return this.taskTracker;
+	}
+
+	@Override
 	public VirtualStructureMap getSymbolMap()
 	{
 		return this.symbolMap;
 	}
 
 	@Nonnull
-	public StructureGenerationContext getContext()
+	@Override
+	public StructureGenerationContext getGenerationContext()
 	{
 		if(this.structureGenerationContext == null)
 			this.structureGenerationContext = new StructureGenerationContext(this.level, this.anchor, this.getGenerationProfile());
@@ -87,6 +97,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		tag.putString("profile", this.profileName.toString());
 		tag.put("map", this.symbolMap.serializeNBT(provider));
 		tag.putIntArray("anchor", new int[] {this.anchor.getX(), this.anchor.getY(), this.anchor.getZ()});
+		tag.put("tasks", this.taskTracker.serializeNBT(provider));
 		return tag;
 	}
 
@@ -98,6 +109,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		this.profileName = ResourceLocation.parse(compoundTag.getString("profile"));
 		this.symbolMap.deserializeNBT(provider, compoundTag.getCompound("map"));
 		this.anchor = new BlockPos(anchorArray[0], anchorArray[1], anchorArray[2]);
+		this.taskTracker.deserializeNBT(provider, compoundTag.getList("tasks", Tag.TAG_COMPOUND));
 		this.structureGenerationContext = null;
 	}
 

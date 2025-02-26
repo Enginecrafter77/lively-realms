@@ -71,6 +71,7 @@ public class LivelyRealmsMod {
         BLOCK_ENTITY_TYPES.register(modEventBus);
         DATA_COMPONENT_TYPES.register(modEventBus);
         modEventBus.addListener(NewRegistryEvent.class, this::registerRegistries);
+        NeoForge.EVENT_BUS.register(StructureMapUpdater.class);
         NeoForge.EVENT_BUS.register(this);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }

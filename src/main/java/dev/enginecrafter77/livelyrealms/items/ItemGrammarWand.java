@@ -5,9 +5,7 @@ import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
 import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
 import dev.enginecrafter77.livelyrealms.generation.*;
 import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpression;
-import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressingAcceptorAdapter;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
-import dev.enginecrafter77.livelyrealms.generation.lattice.LatticeSymbolAcceptor;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaStructureLoader;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.server.level.ServerLevel;
@@ -41,21 +39,18 @@ public class ItemGrammarWand extends Item {
 			context.getItemInHand().set(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP, map.getId());
 
 			CellPosition position = new CellPosition();
-			map.getContext().getEnclosingCell(context.getClickedPos(), position);
+			map.getGenerationContext().getEnclosingCell(context.getClickedPos(), position);
 			map.getSymbolMap().setSymbolAt(position, "start");
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
 		CellPosition cell = new CellPosition();
-		map.getContext().getEnclosingCell(context.getClickedPos(), cell);
+		map.getGenerationContext().getEnclosingCell(context.getClickedPos(), cell);
 
 		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)
 			return InteractionResult.FAIL;
-		SymbolAcceptor acceptor = CompositeSymbolAcceptor.builder()
-				.with(SymbolExpressingAcceptorAdapter.on(map.getContext()))
-				.with(LatticeSymbolAcceptor.to(map.getSymbolMap()))
-				.build();
+		SymbolAcceptor acceptor = map.getTaskTracker().mutationAcceptor();
 		rule.apply(acceptor, map, cell);
 		grid.setDirty();
 

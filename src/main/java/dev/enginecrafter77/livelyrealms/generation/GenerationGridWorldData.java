@@ -12,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -37,6 +38,11 @@ public class GenerationGridWorldData extends SavedData {
 	public MinecraftStructureMap get(UUID key)
 	{
 		return this.maps.get(key);
+	}
+
+	public Collection<MinecraftStructureMap> allMaps()
+	{
+		return this.maps.values();
 	}
 
 	public static GenerationGridWorldData load(Level level, CompoundTag compoundTag, HolderLookup.Provider provider)
