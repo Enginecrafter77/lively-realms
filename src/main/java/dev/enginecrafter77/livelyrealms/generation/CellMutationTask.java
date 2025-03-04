@@ -1,9 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
-import dev.enginecrafter77.livelyrealms.generation.expression.StructureBuildTask;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
-import dev.enginecrafter77.livelyrealms.generation.plan.StructureBuildContext;
-import dev.enginecrafter77.livelyrealms.generation.plan.StructureBuildPlan;
+import dev.enginecrafter77.livelyrealms.generation.plan.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -11,53 +9,67 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
-public class CellMutationTask implements INBTSerializable<CompoundTag> {
-	private final CellMutationContext context;
+public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildContextOwner {
+	private final CellMutationContext gridContext;
 	private final CellPosition cellPosition;
 	private String toSymbol;
 
 	@Nullable
-	private StructureBuildTask task;
+	private BuildPlan plan;
 
-	public CellMutationTask(CellMutationContext context)
+	@Nullable
+	private BuildContext buildContext;
+
+	@Nullable
+	private PlanInterpreter planInterpreter;
+
+	public CellMutationTask(CellMutationContext gridContext)
 	{
 		this.cellPosition = new CellPosition();
-		this.context = context;
+		this.gridContext = gridContext;
 		this.toSymbol = MinecraftStructureMap.EPSILON;
-		this.task = null;
+		this.planInterpreter = null;
+		this.buildContext = null;
+		this.plan = null;
 	}
 
-	public StructureBuildPlan getPlan()
+	public BuildPlan getPlan()
 	{
-		SymbolExpression expression = this.context.getGenerationContext().getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
-		if(expression == null)
-			throw new NoSuchElementException();
-		return expression.getBuildPlan();
-	}
-
-	public StructureBuildTask getBuildTask()
-	{
-		if(this.task == null)
+		if(this.plan == null)
 		{
-			BlockPos anchor = this.context.getGenerationContext().getBlockPositionInsideCell(this.cellPosition, BlockPos.ZERO);
-			StructureBuildContext buildContext = new StructureBuildContext(this.context.getGenerationContext().level, anchor);
-			StructureBuildPlan plan = this.getPlan();
-			this.task = new StructureBuildTask(buildContext, plan);
+			SymbolExpression expression = this.gridContext.getGenerationContext().getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
+			if(expression == null)
+				throw new NoSuchElementException();
+			this.plan = BuildPlanBuilder.begin().stage(expression.getBuildPlan()).beginStage().step(new CommitSymbolBuildStep()).endStage().build();
 		}
-		return this.task;
+		return this.plan;
 	}
 
-	public boolean hasNextStep()
+	@Override
+	public BuildContext getContext()
 	{
-		return this.getBuildTask().hasNextStep();
+		if(this.buildContext == null)
+		{
+			BlockPos anchor = this.gridContext.getGenerationContext().getBlockPositionInsideCell(this.cellPosition, BlockPos.ZERO);
+			this.buildContext = new BuildContext(this.gridContext.getGenerationContext().level, anchor);
+		}
+		return this.buildContext;
 	}
 
-	public void step()
+	public PlanInterpreter getPlanInterpreter()
 	{
-		this.getBuildTask().step();
-		if(!this.getBuildTask().hasNextStep())
-			this.context.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
+		if(this.planInterpreter == null)
+			this.planInterpreter = new ContextAwarePlanInterpreter(this.getPlan(), this);
+		return this.planInterpreter;
+	}
+
+	private void invalidateComponents()
+	{
+		this.plan = null;
+		this.buildContext = null;
+		this.planInterpreter = null;
 	}
 
 	@Override
@@ -66,17 +78,18 @@ public class CellMutationTask implements INBTSerializable<CompoundTag> {
 		CompoundTag tag = new CompoundTag();
 		tag.putIntArray("cell", new int[] {this.cellPosition.x, this.cellPosition.y, this.cellPosition.z});
 		tag.putString("symbol", this.toSymbol);
-		this.getBuildTask().saveState(tag);
+		this.getPlanInterpreter().saveState(tag);
 		return tag;
 	}
 
 	@Override
 	public void deserializeNBT(HolderLookup.Provider provider, CompoundTag compoundTag)
 	{
+		this.invalidateComponents();
 		int[] cellPos = compoundTag.getIntArray("cell");
 		this.toSymbol = compoundTag.getString("symbol");
 		this.cellPosition.set(cellPos);
-		this.getBuildTask().restoreState(compoundTag);
+		this.getPlanInterpreter().restoreState(compoundTag);
 	}
 
 	public static CellMutationTask create(CellMutationContext context, ReadableCellPosition position, String toSymbol)
@@ -85,5 +98,21 @@ public class CellMutationTask implements INBTSerializable<CompoundTag> {
 		task.cellPosition.set(position);
 		task.toSymbol = toSymbol;
 		return task;
+	}
+
+	private class CommitSymbolBuildStep implements BuildStep
+	{
+		@Override
+		public void perform(BuildContext context)
+		{
+			CellMutationTask.this.gridContext.getSymbolMap().setSymbolAt(CellMutationTask.this.cellPosition, CellMutationTask.this.toSymbol);
+		}
+
+		@Override
+		public boolean isComplete(BuildContext context)
+		{
+			String existing = CellMutationTask.this.gridContext.getSymbolMap().getSymbolAt(CellMutationTask.this.cellPosition);
+			return Objects.equals(existing, CellMutationTask.this.toSymbol);
+		}
 	}
 }

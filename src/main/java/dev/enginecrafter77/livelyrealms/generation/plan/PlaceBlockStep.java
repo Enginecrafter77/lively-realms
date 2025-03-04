@@ -1,9 +1,12 @@
 package dev.enginecrafter77.livelyrealms.generation.plan;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PlaceBlockStep implements StructureBuildStep {
+import java.util.Objects;
+
+public class PlaceBlockStep implements BuildStep {
 	public final BlockPos relativePosition;
 	public final BlockState blockState;
 
@@ -14,9 +17,19 @@ public class PlaceBlockStep implements StructureBuildStep {
 	}
 
 	@Override
-	public void perform(StructureBuildContext context)
+	public void perform(BuildContext context)
 	{
-		BlockPos worldPos = context.anchor().offset(this.relativePosition);
-		context.level().setBlockAndUpdate(worldPos, this.blockState);
+		context.setBlockAndUpdate(this.relativePosition, this.blockState);
+	}
+
+	@Override
+	public boolean isComplete(BuildContext context)
+	{
+		return Objects.equals(this.blockState, context.getBlockState(this.relativePosition));
+	}
+
+	public static PlaceBlockStep clear(BlockPos pos)
+	{
+		return new PlaceBlockStep(pos, Blocks.AIR.defaultBlockState());
 	}
 }

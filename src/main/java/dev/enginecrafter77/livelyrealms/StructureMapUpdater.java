@@ -3,6 +3,7 @@ package dev.enginecrafter77.livelyrealms;
 import dev.enginecrafter77.livelyrealms.generation.CellMutationTask;
 import dev.enginecrafter77.livelyrealms.generation.GenerationGridWorldData;
 import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
+import dev.enginecrafter77.livelyrealms.generation.plan.BuildStep;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,10 +26,15 @@ public class StructureMapUpdater {
 			while(itr.hasNext())
 			{
 				CellMutationTask task = itr.next();
-				if(task.hasNextStep())
-					task.step();
+				if(task.getPlanInterpreter().hasNextStep())
+				{
+					BuildStep step = task.getPlanInterpreter().nextStep();
+					step.perform(task.getContext());
+				}
 				else
+				{
 					itr.remove();
+				}
 				updated = true;
 			}
 		}

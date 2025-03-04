@@ -2,7 +2,7 @@ package dev.enginecrafter77.livelyrealms.generation.plan;
 
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 
-public class ConjureBuildPlan extends StructureBuildPlan {
+public class ConjureBuildPlan extends BuildPlan {
 	private final Structure structure;
 
 	public ConjureBuildPlan(Structure structure)
@@ -11,9 +11,11 @@ public class ConjureBuildPlan extends StructureBuildPlan {
 	}
 
 	@Override
-	public StructureBuildStep getStep(int stepIndex)
+	public BuildStep getStep(int stepIndex)
 	{
-		return new ConjureStructureStep(this.structure);
+		if(stepIndex != 0)
+			throw new IndexOutOfBoundsException(stepIndex);
+		return new ConjureStep(this.structure);
 	}
 
 	@Override

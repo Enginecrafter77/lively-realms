@@ -1,7 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation.expression;
 
-import dev.enginecrafter77.livelyrealms.generation.plan.StraightForwardBuildPlan;
-import dev.enginecrafter77.livelyrealms.generation.plan.StructureBuildPlan;
+import dev.enginecrafter77.livelyrealms.generation.plan.SimpleStructureBuildPlan;
+import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 
 public class MultiblockExpression implements SymbolExpression {
@@ -13,9 +13,9 @@ public class MultiblockExpression implements SymbolExpression {
 	}
 
 	@Override
-	public StructureBuildPlan getBuildPlan()
+	public BuildPlan getBuildPlan()
 	{
-		return new StraightForwardBuildPlan(this.struct);
+		return new SimpleStructureBuildPlan(this.struct);
 	}
 
 	public static MultiblockExpression of(Structure structure)

@@ -1,7 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation.expression;
 
-import dev.enginecrafter77.livelyrealms.generation.plan.StructureBuildPlan;
+import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
 
 public interface SymbolExpression {
-	public StructureBuildPlan getBuildPlan();
+	public BuildPlan getBuildPlan();
 }

@@ -4,16 +4,16 @@ import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 
-public class DefiniteStructureBuildPlan extends StructureBuildPlan {
-	private final List<StructureBuildStep> steps;
+public class DefiniteStructureBuildPlan extends BuildPlan {
+	private final List<BuildStep> steps;
 
-	public DefiniteStructureBuildPlan(List<StructureBuildStep> steps)
+	public DefiniteStructureBuildPlan(List<BuildStep> steps)
 	{
 		this.steps = steps;
 	}
 
 	@Override
-	public StructureBuildStep getStep(int stepIndex)
+	public BuildStep getStep(int stepIndex)
 	{
 		return this.steps.get(stepIndex);
 	}
@@ -24,29 +24,13 @@ public class DefiniteStructureBuildPlan extends StructureBuildPlan {
 		return this.steps.size();
 	}
 
-	public static BuildPlanBuilder builder()
+	public static DefiniteStructureBuildPlan of(List<BuildStep> steps)
 	{
-		return new BuildPlanBuilder();
+		return new DefiniteStructureBuildPlan(ImmutableList.copyOf(steps));
 	}
 
-	public static class BuildPlanBuilder
+	public static DefiniteStructureBuildPlan of(BuildStep... steps)
 	{
-		private final ImmutableList.Builder<StructureBuildStep> stepBuilder;
-
-		public BuildPlanBuilder()
-		{
-			this.stepBuilder = ImmutableList.builder();
-		}
-
-		public BuildPlanBuilder then(StructureBuildStep step)
-		{
-			this.stepBuilder.add(step);
-			return this;
-		}
-
-		public DefiniteStructureBuildPlan build()
-		{
-			return new DefiniteStructureBuildPlan(this.stepBuilder.build());
-		}
+		return DefiniteStructureBuildPlan.of(ImmutableList.copyOf(steps));
 	}
 }
