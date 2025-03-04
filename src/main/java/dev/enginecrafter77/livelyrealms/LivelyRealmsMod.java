@@ -1,8 +1,6 @@
 package dev.enginecrafter77.livelyrealms;
 
 import com.mojang.serialization.Lifecycle;
-import dev.enginecrafter77.livelyrealms.blocks.BlockEntityNonterminal;
-import dev.enginecrafter77.livelyrealms.blocks.BlockNonterminal;
 import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
 import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.core.MappedRegistry;
@@ -55,11 +53,8 @@ public class LivelyRealmsMod {
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> DC_ASSOCIATED_GENERATION_MAP = DATA_COMPONENT_TYPES.registerComponentType("generation_map", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
 
-    public static final DeferredBlock<BlockNonterminal> BLOCK_NONTERMINAL = BLOCKS.registerBlock("nonterminal", BlockNonterminal::new, BlockBehaviour.Properties.of());
-    public static final DeferredItem<?> ITEM_BLOCK_NONTERMINAL = ITEMS.registerSimpleBlockItem(BLOCK_NONTERMINAL);
     public static final DeferredItem<ItemGrammarWand> ITEM_GRAMMAR_WAND = ITEMS.registerItem("grammar_wand", (props) -> new ItemGrammarWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
     public static final DeferredHolder<GenerationProfile, GenerationProfile> SAMPLE_PROFILE = GENERATION_PROFILES.register("sample", GenerationProfile.using(ItemGrammarWand::configureGrammar));
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityNonterminal>> BLOCK_ENTITY_TYPE_NONTERMINAL = BLOCK_ENTITY_TYPES.register("nonterminal", () -> new BlockEntityType<BlockEntityNonterminal>(BlockEntityNonterminal::new, Set.of(BLOCK_NONTERMINAL.get()), null));
 
     public LivelyRealmsMod(IEventBus modEventBus, ModContainer modContainer)
     {
@@ -94,7 +89,6 @@ public class LivelyRealmsMod {
     {
         if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES)
         {
-            event.accept(ITEM_BLOCK_NONTERMINAL);
             event.accept(ITEM_GRAMMAR_WAND);
         }
     }
