@@ -15,6 +15,6 @@ public class ContextAwarePlanInterpreter extends JumpingPlanInterpreter {
 		BuildContext context = this.contextOwner.getContext();
 		if(context == null)
 			return true;
-		return !step.isComplete(context);
+		return !step.action().isComplete(context);
 	}
 }

@@ -16,7 +16,7 @@ public class SingleBlockExpression implements SymbolExpression {
 	@Override
 	public BuildPlan getBuildPlan()
 	{
-		return DefiniteStructureBuildPlan.of(new PlaceBlockStep(BlockPos.ZERO, this.block));
+		return DefiniteStructureBuildPlan.of(new PlaceBlockAction(BlockPos.ZERO, this.block));
 	}
 
 	@Override

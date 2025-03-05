@@ -27,6 +27,6 @@ public class SimpleStructureBuildPlan extends BuildPlan {
 	{
 		Vector3i position = new Vector3i();
 		this.voxelIndexer.fromIndex(stepIndex, position);
-		return new PlaceBlockStep(new BlockPos(position.x, position.y, position.z), structure.getBlockAt(position).getBlockState());
+		return this.makeStep(stepIndex, new PlaceBlockAction(new BlockPos(position.x, position.y, position.z), structure.getBlockAt(position).getBlockState()));
 	}
 }

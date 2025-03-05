@@ -22,14 +22,14 @@ public class StructureMapUpdater {
 		boolean updated = false;
 		for(MinecraftStructureMap map : data.allMaps())
 		{
-			Iterator<CellMutationTask> itr = map.getTaskTracker().getActiveTasks().iterator();
+			Iterator<CellMutationTask> itr = map.getTaskTracker().allActiveTasks().iterator();
 			while(itr.hasNext())
 			{
 				CellMutationTask task = itr.next();
 				if(task.getPlanInterpreter().hasNextStep())
 				{
 					BuildStep step = task.getPlanInterpreter().nextStep();
-					step.perform(task.getContext());
+					step.action().perform(task.getContext());
 				}
 				else
 				{

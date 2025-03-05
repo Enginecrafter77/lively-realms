@@ -4,6 +4,11 @@ public abstract class BuildPlan {
 	public abstract BuildStep getStep(int stepIndex);
 	public abstract int getStepCount();
 
+	protected BuildStep makeStep(int index, BuildStepAction action)
+	{
+		return new BuildStep(this, index, action);
+	}
+
 	public BuildPlan partial(float from, float to)
 	{
 		if(from < 0F || from > 1F || to < 0F || to > 1F)
@@ -18,12 +23,6 @@ public abstract class BuildPlan {
 		if(from < 0 || from >= this.getStepCount() || to < 0 || to >= this.getStepCount())
 			throw new IndexOutOfBoundsException();
 		return new PartialBuildPlan(this, from, to);
-	}
-
-	public void execute(BuildContext context)
-	{
-		for(int step = 0; step < this.getStepCount(); ++step)
-			this.getStep(step).perform(context);
 	}
 
 	private static class PartialBuildPlan extends BuildPlan

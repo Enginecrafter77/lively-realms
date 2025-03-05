@@ -38,14 +38,14 @@ public class BuildPlanBuilder {
 
 	public class BuildStageBuilder
 	{
-		private final ImmutableList.Builder<BuildStep> steps;
+		private final ImmutableList.Builder<BuildStepAction> steps;
 
 		public BuildStageBuilder()
 		{
 			this.steps = ImmutableList.builder();
 		}
 
-		public BuildStageBuilder step(BuildStep step)
+		public BuildStageBuilder step(BuildStepAction step)
 		{
 			this.steps.add(step);
 			return this;

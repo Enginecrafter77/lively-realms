@@ -7,9 +7,9 @@ import java.util.List;
 public class DefiniteStructureBuildPlan extends BuildPlan {
 	private final List<BuildStep> steps;
 
-	public DefiniteStructureBuildPlan(List<BuildStep> steps)
+	public DefiniteStructureBuildPlan(List<BuildStepAction> steps)
 	{
-		this.steps = steps;
+		this.steps = BuildStepIndexer.index(steps, this);
 	}
 
 	@Override
@@ -24,12 +24,12 @@ public class DefiniteStructureBuildPlan extends BuildPlan {
 		return this.steps.size();
 	}
 
-	public static DefiniteStructureBuildPlan of(List<BuildStep> steps)
+	public static DefiniteStructureBuildPlan of(List<BuildStepAction> steps)
 	{
 		return new DefiniteStructureBuildPlan(ImmutableList.copyOf(steps));
 	}
 
-	public static DefiniteStructureBuildPlan of(BuildStep... steps)
+	public static DefiniteStructureBuildPlan of(BuildStepAction... steps)
 	{
 		return DefiniteStructureBuildPlan.of(ImmutableList.copyOf(steps));
 	}

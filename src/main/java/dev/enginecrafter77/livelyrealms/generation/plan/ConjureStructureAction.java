@@ -9,17 +9,17 @@ import org.joml.Vector3ic;
 
 import java.util.Objects;
 
-public class ConjureStep implements BuildStep {
+public class ConjureStructureAction implements BuildStepAction {
 	private final Structure structure;
 	private final Vec3i offset;
 
-	public ConjureStep(Structure structure, Vec3i offset)
+	public ConjureStructureAction(Structure structure, Vec3i offset)
 	{
 		this.structure = structure;
 		this.offset = offset;
 	}
 
-	public ConjureStep(Structure structure)
+	public ConjureStructureAction(Structure structure)
 	{
 		this(structure, BlockPos.ZERO);
 	}

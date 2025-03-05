@@ -35,6 +35,11 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		this.plan = null;
 	}
 
+	public ReadableCellPosition getCellPosition()
+	{
+		return this.cellPosition;
+	}
+
 	public BuildPlan getPlan()
 	{
 		if(this.plan == null)
@@ -100,7 +105,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return task;
 	}
 
-	private class CommitSymbolBuildStep implements BuildStep
+	private class CommitSymbolBuildStep implements BuildStepAction
 	{
 		@Override
 		public void perform(BuildContext context)

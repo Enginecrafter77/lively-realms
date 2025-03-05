@@ -17,11 +17,15 @@ public class StagedBuildPlan extends BuildPlan {
 	@Override
 	public BuildStep getStep(int stepIndex)
 	{
+		int stageStepIndex = stepIndex;
 		for(BuildPlan stage : this.stages)
 		{
-			if(stage.getStepCount() > stepIndex)
-				return stage.getStep(stepIndex);
-			stepIndex -= stage.getStepCount();
+			if(stage.getStepCount() > stageStepIndex)
+			{
+				BuildStep stageStep = stage.getStep(stageStepIndex);
+				return new BuildStep(this, stepIndex, stageStep.action());
+			}
+			stageStepIndex -= stage.getStepCount();
 		}
 		throw new IndexOutOfBoundsException();
 	}
