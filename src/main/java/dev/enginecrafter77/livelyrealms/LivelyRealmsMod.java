@@ -1,9 +1,10 @@
 package dev.enginecrafter77.livelyrealms;
 
 import com.mojang.serialization.Lifecycle;
+import dev.enginecrafter77.livelyrealms.entity.*;
+import dev.enginecrafter77.livelyrealms.entity.cap.*;
 import dev.enginecrafter77.livelyrealms.entity.client.DwarfRenderer;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelDwarf;
-import dev.enginecrafter77.livelyrealms.entity.EntityDwarf;
 import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
 import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -14,15 +15,13 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.neoforged.neoforge.client.ClientHooks;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.registries.*;
 import org.slf4j.Logger;
@@ -43,10 +42,8 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import org.w3c.dom.Attr;
 
 import java.util.UUID;
 
@@ -64,8 +61,14 @@ public class LivelyRealmsMod {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
     public static final DeferredRegister.DataComponents DATA_COMPONENT_TYPES = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, MODID);
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(Registries.ENTITY_TYPE, MODID);
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> DC_ASSOCIATED_GENERATION_MAP = DATA_COMPONENT_TYPES.registerComponentType("generation_map", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<WorkStepLocatorHolder>> AT_WORK_CONTAINER = ATTACHMENT_TYPES.register("work", () -> AttachmentType.serializable(WorkStepLocatorHolder::new).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<MapAllegianceContainer>> AT_ALLEGIANCE = ATTACHMENT_TYPES.register("allegiance", () -> AttachmentType.serializable(MapAllegianceContainer::new).build());
+
+    public static final EntityCapability<MapAllegianceHolder, Void> CAPABILITY_ALLEGIANCE = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath(MODID, "allegiance"), MapAllegianceHolder.class);
+    public static final EntityCapability<WorkHandler, Void> CAPABILITY_WORKER = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath(MODID, "worker"), WorkHandler.class);
 
     public static final DeferredItem<ItemGrammarWand> ITEM_GRAMMAR_WAND = ITEMS.registerItem("grammar_wand", (props) -> new ItemGrammarWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
     public static final DeferredHolder<GenerationProfile, GenerationProfile> SAMPLE_PROFILE = GENERATION_PROFILES.register("sample", GenerationProfile.using(ItemGrammarWand::configureGrammar));
@@ -80,9 +83,8 @@ public class LivelyRealmsMod {
         BLOCK_ENTITY_TYPES.register(modEventBus);
         DATA_COMPONENT_TYPES.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
-
+        ATTACHMENT_TYPES.register(modEventBus);
         NeoForge.EVENT_BUS.register(StructureMapUpdater.class);
-
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
@@ -119,6 +121,13 @@ public class LivelyRealmsMod {
     public void registerEntityAttributes(EntityAttributeCreationEvent event)
     {
         event.put(ENTITY_TYPE_DWARF.get(), EntityDwarf.attributes());
+    }
+
+    @SubscribeEvent
+    public void registerCapabilities(RegisterCapabilitiesEvent event)
+    {
+        event.registerEntity(CAPABILITY_ALLEGIANCE, ENTITY_TYPE_DWARF.get(), new MapAllegianceCapabilityProvider());
+        event.registerEntity(CAPABILITY_WORKER, ENTITY_TYPE_DWARF.get(), new WorkCapabilityProvider());
     }
 
     @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.GAME)

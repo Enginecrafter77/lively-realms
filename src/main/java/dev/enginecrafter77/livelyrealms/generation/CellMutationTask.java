@@ -40,6 +40,11 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return this.cellPosition;
 	}
 
+	public String getToSymbol()
+	{
+		return this.toSymbol;
+	}
+
 	public BuildPlan getPlan()
 	{
 		if(this.plan == null)
@@ -47,7 +52,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 			SymbolExpression expression = this.gridContext.getGenerationContext().getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
 			if(expression == null)
 				throw new NoSuchElementException();
-			this.plan = BuildPlanBuilder.begin().stage(expression.getBuildPlan()).beginStage().step(new CommitSymbolBuildStep()).endStage().build();
+			this.plan = expression.getBuildPlan();
 		}
 		return this.plan;
 	}
@@ -77,6 +82,21 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		this.planInterpreter = null;
 	}
 
+	public void commit()
+	{
+		this.gridContext.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
+	}
+
+	public boolean isActive()
+	{
+		return this.getPlanInterpreter().hasNextStep();
+	}
+
+	public boolean isDone()
+	{
+		return !this.isActive();
+	}
+
 	@Override
 	public CompoundTag serializeNBT(HolderLookup.Provider provider)
 	{
@@ -103,21 +123,5 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		task.cellPosition.set(position);
 		task.toSymbol = toSymbol;
 		return task;
-	}
-
-	private class CommitSymbolBuildStep implements BuildStepAction
-	{
-		@Override
-		public void perform(BuildContext context)
-		{
-			CellMutationTask.this.gridContext.getSymbolMap().setSymbolAt(CellMutationTask.this.cellPosition, CellMutationTask.this.toSymbol);
-		}
-
-		@Override
-		public boolean isComplete(BuildContext context)
-		{
-			String existing = CellMutationTask.this.gridContext.getSymbolMap().getSymbolAt(CellMutationTask.this.cellPosition);
-			return Objects.equals(existing, CellMutationTask.this.toSymbol);
-		}
 	}
 }

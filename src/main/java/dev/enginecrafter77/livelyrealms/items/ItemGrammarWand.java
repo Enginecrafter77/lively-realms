@@ -8,14 +8,20 @@ import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpressi
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaStructureLoader;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MapItem;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class ItemGrammarWand extends Item {
 	public static final String EPSILON = MinecraftStructureMap.EPSILON;
@@ -55,6 +61,14 @@ public class ItemGrammarWand extends Item {
 		grid.setDirty();
 
 		return InteractionResult.SUCCESS;
+	}
+
+	@Override
+	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag)
+	{
+		super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+		UUID map = stack.get(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP);
+		tooltipComponents.add(Component.literal(map == null ? "No map" : String.format("Map: %s", map)));
 	}
 
 	public static void configureGrammar(Grammar.GrammarBuilder builder, SymbolExpressionRegistry.SymbolExpressionRegistryBuilder expressionRegistryBuilder)

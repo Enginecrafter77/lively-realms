@@ -4,12 +4,13 @@ import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3d;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
 import java.util.Objects;
 
-public class ConjureStructureAction implements BuildStepAction {
+public class ConjureStructureAction extends BuildStepAction {
 	private final Structure structure;
 	private final Vec3i offset;
 
@@ -57,5 +58,21 @@ public class ConjureStructureAction implements BuildStepAction {
 				return false;
 		}
 		return true;
+	}
+
+	@Override
+	public boolean hasHotspot()
+	{
+		return true;
+	}
+
+	@Override
+	public void getHotspot(BuildContext context, Vector3d dest)
+	{
+		BlockPos anchor = context.anchor();
+		Vector3ic size = this.structure.getSize();
+		dest.x = anchor.getX() + this.offset.getX() + size.x() / 2F;
+		dest.y = anchor.getY() + this.offset.getY() + size.y() / 2F;
+		dest.z = anchor.getZ() + this.offset.getZ() + size.z() / 2F;
 	}
 }

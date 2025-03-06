@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class MapTaskTracker implements INBTSerializable<ListTag> {
 	private final Map<ImmutableCellPosition, CellMutationTask> activeTasks;
@@ -33,9 +34,19 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 		return this.activeTasks.get(ImmutableCellPosition.copyOf(position));
 	}
 
-	public Collection<CellMutationTask> allActiveTasks()
+	public void removeTask(ReadableCellPosition position)
+	{
+		this.activeTasks.remove(ImmutableCellPosition.copyOf(position));
+	}
+
+	public Collection<CellMutationTask> allTasks()
 	{
 		return this.activeTasks.values();
+	}
+
+	public Stream<CellMutationTask> allActiveTasks()
+	{
+		return this.allTasks().stream().filter(CellMutationTask::isActive);
 	}
 
 	public SymbolAcceptor mutationAcceptor()
@@ -55,7 +66,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 	public ListTag serializeNBT(HolderLookup.Provider provider)
 	{
 		ListTag tag = new ListTag();
-		for(CellMutationTask task : this.allActiveTasks())
+		for(CellMutationTask task : this.allTasks())
 			tag.add(task.serializeNBT(provider));
 		return tag;
 	}
