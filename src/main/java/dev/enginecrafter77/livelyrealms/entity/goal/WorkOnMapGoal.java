@@ -5,6 +5,7 @@ import dev.enginecrafter77.livelyrealms.entity.cap.AssignedWorkStep;
 import dev.enginecrafter77.livelyrealms.entity.cap.WorkHandler;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildStep;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -74,8 +75,8 @@ public class WorkOnMapGoal extends Goal {
 				if(!this.entity.getNavigation().isInProgress())
 				{
 					this.entity.getNavigation().setMaxVisitedNodesMultiplier(10F);
-					boolean found = this.entity.getNavigation().moveTo(this.hotspot.x, this.hotspot.y, this.hotspot.z, (int)Math.floor(activationDistance), 1D);
-					LOGGER.info("Entered new path into pathfinder. Found? " + found);
+					boolean found = this.entity.getNavigation().moveTo(this.hotspot.x, this.hotspot.y, this.hotspot.z, (int)Math.floor(activationDistance), this.entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
+					LOGGER.info("Entered new path into pathfinder. Found? {}", found);
 				}
 				if(this.entity.getNavigation().isDone())
 				{
