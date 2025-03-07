@@ -57,6 +57,11 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return this.plan;
 	}
 
+	public CellMutationContext getGridContext()
+	{
+		return this.gridContext;
+	}
+
 	@Override
 	public BuildContext getContext()
 	{

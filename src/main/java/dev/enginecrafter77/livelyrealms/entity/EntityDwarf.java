@@ -7,6 +7,7 @@ import dev.enginecrafter77.livelyrealms.entity.cap.MapAllegianceHolder;
 import dev.enginecrafter77.livelyrealms.entity.cap.WorkHandler;
 import dev.enginecrafter77.livelyrealms.entity.goal.WorkOnMapGoal;
 import dev.enginecrafter77.livelyrealms.generation.CellMutationTask;
+import dev.enginecrafter77.livelyrealms.generation.ClosestTaskComparator;
 import dev.enginecrafter77.livelyrealms.generation.GenerationGridWorldData;
 import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildStep;
@@ -89,7 +90,7 @@ public class EntityDwarf extends PathfinderMob {
 		MinecraftStructureMap map = grid.get(allegiance);
 		if(map == null)
 			return;
-		CellMutationTask task = map.getTaskTracker().allActiveTasks().findFirst().orElse(null);
+		CellMutationTask task = map.getTaskTracker().allActiveTasks().min(ClosestTaskComparator.to(this.position())).orElse(null);
 		if(task == null)
 			return;
 		PlanInterpreter interpreter = task.getPlanInterpreter();
