@@ -4,13 +4,8 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
 
-public class Grammar {
-	public final Set<GrammarRule> rules;
-
-	public Grammar(Set<GrammarRule> rules)
-	{
-		this.rules = rules;
-	}
+public record Grammar(Set<GrammarRule> rules, String startingSymbol) {
+	public static final String DEFAULT_STARTING_SYMBOL = "start";
 
 	public static GrammarBuilder builder()
 	{
@@ -20,10 +15,12 @@ public class Grammar {
 	public static class GrammarBuilder
 	{
 		private final ImmutableSet.Builder<GrammarRule> ruleBuilder;
+		private String startingSymbol;
 
 		public GrammarBuilder()
 		{
 			this.ruleBuilder = ImmutableSet.builder();
+			this.startingSymbol = DEFAULT_STARTING_SYMBOL;
 		}
 
 		public GrammarBuilder withRule(GrammarRule rule)
@@ -32,9 +29,15 @@ public class Grammar {
 			return this;
 		}
 
+		public GrammarBuilder withStartingSymbol(String startingSymbol)
+		{
+			this.startingSymbol = startingSymbol;
+			return this;
+		}
+
 		public Grammar build()
 		{
-			return new Grammar(this.ruleBuilder.build());
+			return new Grammar(this.ruleBuilder.build(), this.startingSymbol);
 		}
 	}
 }

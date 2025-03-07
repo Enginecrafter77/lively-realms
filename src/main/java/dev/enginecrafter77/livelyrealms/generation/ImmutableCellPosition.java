@@ -28,6 +28,8 @@ public class ImmutableCellPosition extends CommonReadableCellPosition {
 		return new ImmutableCellPosition(x, y, z);
 	});
 
+	public static final ImmutableCellPosition ZERO = new ImmutableCellPosition(0, 0, 0);
+
 	private static final int HASH_SALT = 227051551;
 
 	private final int x;
@@ -90,6 +92,11 @@ public class ImmutableCellPosition extends CommonReadableCellPosition {
 	public int[] toArray()
 	{
 		return new int[] {this.x, this.y, this.z};
+	}
+
+	public static ImmutableCellPosition of(int x, int y, int z)
+	{
+		return new ImmutableCellPosition(x, y, z);
 	}
 
 	public static ImmutableCellPosition copyOf(ReadableCellPosition other)

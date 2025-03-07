@@ -13,7 +13,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 
@@ -41,19 +40,19 @@ public class ItemGrammarWand extends Item {
 		MinecraftStructureMap map = Optional.ofNullable(context.getItemInHand().get(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP)).map(grid::get).orElse(null);
 		if(map == null)
 		{
-			map = grid.createMap(context.getClickedPos(), LivelyRealmsMod.SAMPLE_PROFILE.getId());
+			map = grid.createMap(context.getClickedPos(), LivelyRealmsMod.SAMPLE_PROFILE);
 			context.getItemInHand().set(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP, map.getId());
 
 			CellPosition position = new CellPosition();
 			map.getCellLocator().getEnclosingCell(context.getClickedPos(), position);
-			map.getSymbolMap().setSymbolAt(position, "start");
+			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().startingSymbol());
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
 		CellPosition cell = new CellPosition();
 		map.getCellLocator().getEnclosingCell(context.getClickedPos(), cell);
 
-		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
+		GrammarRule rule = grammar.rules().stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)
 			return InteractionResult.FAIL;
 		SymbolAcceptor acceptor = map.getTaskTracker().mutationAcceptor();
@@ -87,7 +86,7 @@ public class ItemGrammarWand extends Item {
 		}
 
 		builder.withRule(SubstitutionRule.builder()
-				.match(CellPosition.ORIGIN, "start")
+				.match(CellPosition.ORIGIN, Grammar.DEFAULT_STARTING_SYMBOL)
 				.put(CellPosition.ORIGIN, "hall4")
 				.build()
 			)

@@ -1,10 +1,12 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -27,9 +29,9 @@ public class GenerationGridWorldData extends SavedData {
 		this.level = level;
 	}
 
-	public MinecraftStructureMap createMap(BlockPos anchor, ResourceLocation profile)
+	public MinecraftStructureMap createMap(BlockPos anchor, Holder<GenerationProfile> profile)
 	{
-		MinecraftStructureMap map = MinecraftStructureMap.create(this.level, anchor, profile);
+		MinecraftStructureMap map = MinecraftStructureMap.create(this.level, anchor, profile.unwrapKey().map(ResourceKey::location).orElseThrow());
 		this.maps.put(map.getId(), map);
 		return map;
 	}
