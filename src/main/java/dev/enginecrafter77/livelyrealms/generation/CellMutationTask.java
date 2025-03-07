@@ -49,7 +49,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	{
 		if(this.plan == null)
 		{
-			SymbolExpression expression = this.gridContext.getGenerationContext().getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
+			SymbolExpression expression = this.gridContext.getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
 			if(expression == null)
 				throw new NoSuchElementException();
 			this.plan = expression.getBuildPlan();
@@ -61,10 +61,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	public BuildContext getContext()
 	{
 		if(this.buildContext == null)
-		{
-			BlockPos anchor = this.gridContext.getGenerationContext().getBlockPositionInsideCell(this.cellPosition, BlockPos.ZERO);
-			this.buildContext = new BuildContext(this.gridContext.getGenerationContext().level, anchor);
-		}
+			this.buildContext = this.gridContext.makeBuildContext(this.cellPosition);
 		return this.buildContext;
 	}
 

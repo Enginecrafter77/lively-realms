@@ -45,13 +45,13 @@ public class ItemGrammarWand extends Item {
 			context.getItemInHand().set(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP, map.getId());
 
 			CellPosition position = new CellPosition();
-			map.getGenerationContext().getEnclosingCell(context.getClickedPos(), position);
+			map.getCellLocator().getEnclosingCell(context.getClickedPos(), position);
 			map.getSymbolMap().setSymbolAt(position, "start");
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
 		CellPosition cell = new CellPosition();
-		map.getGenerationContext().getEnclosingCell(context.getClickedPos(), cell);
+		map.getCellLocator().getEnclosingCell(context.getClickedPos(), cell);
 
 		GrammarRule rule = grammar.rules.stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
 		if(rule == null)

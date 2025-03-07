@@ -64,7 +64,7 @@ public final class AssignedWorkStep implements BuildContextOwner {
 			SymbolExpression expression = profile.expressionProvider().getExpression(this.symbol);
 			if(expression == null)
 				return null;
-			BuildContext context = new BuildContext(level, map.getGenerationContext().getBlockPositionInsideCell(this.cell, BlockPos.ZERO));
+			BuildContext context = new BuildContext(level, map.getCellLocator().getBlockPositionInsideCell(this.cell, BlockPos.ZERO));
 			BuildStep step = expression.getBuildPlan().getStep(this.step);
 			return new AssignedWorkStep(this, context, step);
 		}

@@ -1,6 +1,8 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
+import dev.enginecrafter77.livelyrealms.generation.expression.CellLocator;
+import dev.enginecrafter77.livelyrealms.generation.expression.ContinuousCellLocator;
 import dev.enginecrafter77.livelyrealms.generation.lattice.SymbolLattice;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -33,7 +35,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 	private BlockPos anchor;
 
 	@Nullable
-	private StructureGenerationContext structureGenerationContext;
+	private CellLocator cellLocator;
 
 	public MinecraftStructureMap(Level level)
 	{
@@ -43,7 +45,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		this.anchor = BlockPos.ZERO;
 		this.profileName = ResourceLocation.fromNamespaceAndPath(LivelyRealmsMod.MODID, "nonexistent_generation_profile");
 		this.symbolMap = new VirtualStructureMap(EPSILON);
-		this.structureGenerationContext = null;
+		this.cellLocator = null;
 	}
 
 	public UUID getId()
@@ -72,13 +74,18 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		return this.symbolMap;
 	}
 
-	@Nonnull
 	@Override
-	public StructureGenerationContext getGenerationContext()
+	public CellLocator getCellLocator()
 	{
-		if(this.structureGenerationContext == null)
-			this.structureGenerationContext = new StructureGenerationContext(this.level, this.anchor, this.getGenerationProfile());
-		return this.structureGenerationContext;
+		if(this.cellLocator == null)
+			this.cellLocator = new ContinuousCellLocator(this.anchor, this.getGenerationProfile().expressionProvider().getCellSize());
+		return this.cellLocator;
+	}
+
+	@Override
+	public Level getLevel()
+	{
+		return this.level;
 	}
 
 	@Nonnull
@@ -86,6 +93,11 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 	public GenerationProfile getGenerationProfile()
 	{
 		return LivelyRealmsMod.GENERATION_PROFILE_REGISTRY.getOptional(this.profileName).orElseThrow();
+	}
+
+	protected void invalidateCachedObjects()
+	{
+		this.cellLocator = null;
 	}
 
 	@UnknownNullability
@@ -110,7 +122,7 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		this.symbolMap.deserializeNBT(provider, compoundTag.getCompound("map"));
 		this.anchor = new BlockPos(anchorArray[0], anchorArray[1], anchorArray[2]);
 		this.taskTracker.deserializeNBT(provider, compoundTag.getList("tasks", Tag.TAG_COMPOUND));
-		this.structureGenerationContext = null;
+		this.invalidateCachedObjects();
 	}
 
 	@Override

@@ -1,15 +1,12 @@
 package dev.enginecrafter77.livelyrealms.generation.expression;
 
-import dev.enginecrafter77.livelyrealms.generation.GenerationProfileHolder;
 import dev.enginecrafter77.livelyrealms.generation.CellPosition;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
-public interface SymbolExpressionContext extends GenerationProfileHolder {
-	public Level getLevel();
+public interface CellLocator {
 	public void getEnclosingCell(BlockPos pos, CellPosition cellOut);
 	public void getPositionInsideCell(ReadableCellPosition cell, Vector3ic relativePosition, Vector3i out);
 
