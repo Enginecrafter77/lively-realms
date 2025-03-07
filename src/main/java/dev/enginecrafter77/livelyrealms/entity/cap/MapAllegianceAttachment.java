@@ -10,11 +10,11 @@ import org.jetbrains.annotations.UnknownNullability;
 import java.util.Objects;
 import java.util.UUID;
 
-public class MapAllegianceContainer implements INBTSerializable<CompoundTag>, MapAllegianceHolder {
+public class MapAllegianceAttachment implements INBTSerializable<CompoundTag>, MapAllegianceHolder {
 	@Nullable
 	private UUID mapId;
 
-	public MapAllegianceContainer()
+	public MapAllegianceAttachment()
 	{
 		this.mapId = null;
 	}

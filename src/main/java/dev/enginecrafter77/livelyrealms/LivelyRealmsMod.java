@@ -64,8 +64,8 @@ public class LivelyRealmsMod {
     public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, MODID);
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> DC_ASSOCIATED_GENERATION_MAP = DATA_COMPONENT_TYPES.registerComponentType("generation_map", builder -> builder.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
-    public static final DeferredHolder<AttachmentType<?>, AttachmentType<WorkStepLocatorHolder>> AT_WORK_CONTAINER = ATTACHMENT_TYPES.register("work", () -> AttachmentType.serializable(WorkStepLocatorHolder::new).build());
-    public static final DeferredHolder<AttachmentType<?>, AttachmentType<MapAllegianceContainer>> AT_ALLEGIANCE = ATTACHMENT_TYPES.register("allegiance", () -> AttachmentType.serializable(MapAllegianceContainer::new).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<WorkStepLocatorAttachment>> AT_WORK_STEP_LOCATOR = ATTACHMENT_TYPES.register("work", () -> AttachmentType.serializable(WorkStepLocatorAttachment::new).build());
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<MapAllegianceAttachment>> AT_MAP_ALLEGIANCE = ATTACHMENT_TYPES.register("allegiance", () -> AttachmentType.serializable(MapAllegianceAttachment::new).build());
 
     public static final EntityCapability<MapAllegianceHolder, Void> CAPABILITY_ALLEGIANCE = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath(MODID, "allegiance"), MapAllegianceHolder.class);
     public static final EntityCapability<WorkHandler, Void> CAPABILITY_WORKER = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath(MODID, "worker"), WorkHandler.class);

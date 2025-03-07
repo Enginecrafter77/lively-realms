@@ -6,13 +6,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class WorkStepHolder implements WorkHandler {
-	private final WorkStepLocatorHolder locatorHolder;
+	private final WorkStepLocatorAttachment locatorHolder;
 	private final ServerLevel level;
 
 	@Nullable
 	private AssignedWorkStep cachedTaskRef;
 
-	public WorkStepHolder(WorkStepLocatorHolder locatorHolder, ServerLevel level)
+	public WorkStepHolder(WorkStepLocatorAttachment locatorHolder, ServerLevel level)
 	{
 		this.locatorHolder = locatorHolder;
 		this.level = level;

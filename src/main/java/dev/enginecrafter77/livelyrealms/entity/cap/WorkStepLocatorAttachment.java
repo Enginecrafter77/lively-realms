@@ -5,11 +5,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
-public class WorkStepLocatorHolder implements INBTSerializable<CompoundTag> {
+public class WorkStepLocatorAttachment implements INBTSerializable<CompoundTag> {
 	@Nullable
 	private AssignedWorkStep.WorkStepLocator assignedTaskLocator;
 
-	public WorkStepLocatorHolder()
+	public WorkStepLocatorAttachment()
 	{
 		this.assignedTaskLocator = null;
 	}

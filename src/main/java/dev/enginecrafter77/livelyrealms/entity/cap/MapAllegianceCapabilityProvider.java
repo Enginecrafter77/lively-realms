@@ -10,6 +10,6 @@ public class MapAllegianceCapabilityProvider implements ICapabilityProvider<Enti
 	@Override
 	public MapAllegianceHolder getCapability(Entity object, @Nullable Void context)
 	{
-		return object.getData(LivelyRealmsMod.AT_ALLEGIANCE);
+		return object.getData(LivelyRealmsMod.AT_MAP_ALLEGIANCE);
 	}
 }

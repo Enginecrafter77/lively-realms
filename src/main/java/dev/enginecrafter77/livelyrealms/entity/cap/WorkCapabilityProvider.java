@@ -13,7 +13,7 @@ public class WorkCapabilityProvider implements ICapabilityProvider<Entity, Void,
 	{
 		if(object.level().isClientSide())
 			return null;
-		WorkStepLocatorHolder locatorHolder = object.getData(LivelyRealmsMod.AT_WORK_CONTAINER);
+		WorkStepLocatorAttachment locatorHolder = object.getData(LivelyRealmsMod.AT_WORK_STEP_LOCATOR);
 		return new WorkStepHolder(locatorHolder, (ServerLevel)object.level());
 	}
 }
