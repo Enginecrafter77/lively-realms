@@ -50,9 +50,7 @@ public class WorkOnMapGoal extends Goal {
 		AssignedWorkStep task = holder.getAssignedStep();
 		if(task == null)
 			return false;
-		if(this.state == State.DONE)
-			return false;
-		return !task.step().action().isComplete(task.getContext());
+		return this.state != State.DONE;
 	}
 
 	@Override
@@ -66,6 +64,14 @@ public class WorkOnMapGoal extends Goal {
 			throw new IllegalStateException();
 
 		BuildStep step = task.step();
+		if(step.action().isComplete(task.getContext()))
+		{
+			holder.setAssignedStep(null);
+			this.state = State.DONE;
+			LOGGER.info("Work already done, skipping step");
+			return;
+		}
+
 		if(this.state == State.MOVING)
 		{
 			if(step.action().hasHotspot())
@@ -93,8 +99,7 @@ public class WorkOnMapGoal extends Goal {
 		}
 		if(this.state == State.WORKING)
 		{
-			++this.workTicks;
-			if(this.workTicks > 5)
+			if(++this.workTicks > 5)
 			{
 				step.action().perform(task.getContext());
 				holder.setAssignedStep(null);
@@ -105,16 +110,16 @@ public class WorkOnMapGoal extends Goal {
 	}
 
 	@Override
+	public boolean requiresUpdateEveryTick()
+	{
+		return this.state == State.WORKING;
+	}
+
+	@Override
 	public void start()
 	{
 		super.start();
 		this.state = State.MOVING;
-	}
-
-	@Override
-	public boolean requiresUpdateEveryTick()
-	{
-		return this.state == State.WORKING;
 	}
 
 	public static enum State {MOVING, WORKING, DONE}
