@@ -24,7 +24,7 @@ public class StructureMapUpdater {
 			while(itr.hasNext())
 			{
 				CellMutationTask task = itr.next();
-				if(task.isDone())
+				if(task.isDone() && task.validate())
 				{
 					task.commit();
 					itr.remove();

@@ -94,6 +94,19 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return !this.isActive();
 	}
 
+	public boolean validate()
+	{
+		if(!this.isDone())
+			return false;
+		ContextAwarePlanInterpreter newInterpreter = new ContextAwarePlanInterpreter(this.getPlan(), this);
+		if(newInterpreter.hasNextStep())
+		{
+			this.planInterpreter = newInterpreter;
+			return false;
+		}
+		return true;
+	}
+
 	@Override
 	public CompoundTag serializeNBT(HolderLookup.Provider provider)
 	{
