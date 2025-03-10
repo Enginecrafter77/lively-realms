@@ -1,83 +1,50 @@
 package dev.enginecrafter77.livelyrealms;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.Function;
+import java.util.Arrays;
 
-public class WeightVector<T> {
-	private final List<WeightVectorEntry<T>> entries;
+public class WeightVector {
+	private final double[] weights;
 
-	private WeightVector(List<WeightVectorEntry<T>> entries)
+	private WeightVector(double[] weights)
 	{
-		this.entries = entries;
+		this.weights = weights;
 	}
 
-	public WeightVectorEntry<T> at(double num)
+	public int size()
 	{
-		Iterator<WeightVectorEntry<T>> iterator = this.entries.iterator();
-		WeightVectorEntry<T> entry = null;
-		while(num >= 0)
-		{
-			entry = iterator.next();
-			num -= entry.weight;
-		}
-		if(entry == null)
-			throw new IllegalStateException();
-		return entry;
+		return this.weights.length;
 	}
 
-	public static <T> WeightVectorBuilder<T> builder()
+	public double weightOf(int index)
 	{
-		return new WeightVectorBuilder<T>();
+		return this.weights[index];
 	}
 
-	public static class WeightVectorEntry<T>
+	public int at(double value)
 	{
-		private final T item;
-		private final double weight;
-
-		public WeightVectorEntry(T item, double weight)
+		if(value > 1.0 || value < 0.0)
+			throw new IllegalArgumentException();
+		int index = 0;
+		while(value >= this.weights[index])
 		{
-			this.item = item;
-			this.weight = weight;
+			value -= this.weights[index];
+			++index;
 		}
-
-		public WeightVectorEntry<T> normalized(double sum)
-		{
-			return new WeightVectorEntry<T>(this.item, this.weight / sum);
-		}
-
-		public double getWeight()
-		{
-			return this.weight;
-		}
-
-		public T getItem()
-		{
-			return this.item;
-		}
+		return index;
 	}
 
-	public static class WeightVectorBuilder<T>
+	private static double[] normalizeWeights(double[] weights)
 	{
-		private final List<WeightVectorEntry<T>> entries;
+		double sum = Arrays.stream(weights).sum();
+		if(sum == 1.0D)
+			return weights;
+		return Arrays.stream(weights).map(w -> w / sum).toArray();
+	}
 
-		public WeightVectorBuilder()
-		{
-			this.entries = new ArrayList<WeightVectorEntry<T>>();
-		}
-
-		public void add(T item, double weight)
-		{
-			this.entries.add(new WeightVectorEntry<T>(item, weight));
-		}
-
-		public WeightVector<T> build()
-		{
-			double sum = this.entries.parallelStream().mapToDouble(WeightVectorEntry::getWeight).sum();
-			Function<WeightVectorEntry<T>, WeightVectorEntry<T>> normalizer = (WeightVectorEntry<T> entry) -> entry.normalized(sum);
-			return new WeightVector<T>(this.entries.stream().map(normalizer).toList());
-		}
+	public static WeightVector make(double[] weights)
+	{
+		if(weights.length < 1)
+			throw new IllegalArgumentException("Weights array must contain at least 1 element");
+		return new WeightVector(normalizeWeights(weights));
 	}
 }
