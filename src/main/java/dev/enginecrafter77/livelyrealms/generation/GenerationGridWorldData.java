@@ -33,6 +33,7 @@ public class GenerationGridWorldData extends SavedData {
 	{
 		MinecraftStructureMap map = MinecraftStructureMap.create(this.level, anchor, profile.unwrapKey().map(ResourceKey::location).orElseThrow());
 		this.maps.put(map.getId(), map);
+		this.setDirty();
 		return map;
 	}
 
