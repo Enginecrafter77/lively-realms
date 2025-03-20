@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "livelyrealms:item/instant_build_wand"
+  }
+}

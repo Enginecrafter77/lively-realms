@@ -7,6 +7,7 @@ import dev.enginecrafter77.livelyrealms.entity.client.DwarfRenderer;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelDwarf;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelHumanoidDwarf;
 import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
+import dev.enginecrafter77.livelyrealms.items.ItemInstantBuildWand;
 import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.MappedRegistry;
@@ -72,6 +73,7 @@ public class LivelyRealmsMod {
     public static final EntityCapability<WorkHandler, Void> CAPABILITY_WORKER = EntityCapability.createVoid(ResourceLocation.fromNamespaceAndPath(MODID, "worker"), WorkHandler.class);
 
     public static final DeferredItem<ItemGrammarWand> ITEM_GRAMMAR_WAND = ITEMS.registerItem("grammar_wand", (props) -> new ItemGrammarWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
+    public static final DeferredItem<ItemInstantBuildWand> ITEM_INSTANT_BUILD_WANT = ITEMS.registerItem("instant_build_wand", props -> new ItemInstantBuildWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
     public static final DeferredHolder<GenerationProfile, GenerationProfile> SAMPLE_PROFILE = GENERATION_PROFILES.register("sample", GenerationProfile.using(ItemGrammarWand::configureGrammar));
 	public static final DeferredHolder<EntityType<?>, EntityType<EntityDwarf>> ENTITY_TYPE_DWARF = ENTITY_TYPES.register("dwarf", () -> EntityType.Builder.of(EntityDwarf::new, MobCategory.CREATURE).sized(0.75F, 1.5F).build("dwarf"));
 
@@ -109,6 +111,7 @@ public class LivelyRealmsMod {
         if(event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES)
         {
             event.accept(ITEM_GRAMMAR_WAND);
+            event.accept(ITEM_INSTANT_BUILD_WANT);
         }
     }
 
