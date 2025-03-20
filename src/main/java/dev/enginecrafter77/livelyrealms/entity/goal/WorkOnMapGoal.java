@@ -4,10 +4,12 @@ import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
 import dev.enginecrafter77.livelyrealms.entity.cap.AssignedWorkStep;
 import dev.enginecrafter77.livelyrealms.entity.cap.WorkHandler;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildStep;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3d;
@@ -30,7 +32,7 @@ public class WorkOnMapGoal extends Goal {
 		this.hotspot = new Vector3d();
 		this.entity = entity;
 		this.state = State.DONE;
-		this.setFlags(EnumSet.of(Flag.MOVE));
+		this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
 	}
 
 	@Override
@@ -87,10 +89,11 @@ public class WorkOnMapGoal extends Goal {
 				}
 				if(this.entity.getNavigation().isDone())
 				{
+					this.entity.lookAt(EntityAnchorArgument.Anchor.EYES, new Vec3(this.hotspot.x, this.hotspot.y, this.hotspot.z));
 					this.entity.getNavigation().resetMaxVisitedNodesMultiplier();
 					this.workTicks = 0;
 					this.state = State.WORKING;
-					LOGGER.info("Moved to work, starting work...");
+					LOGGER.info("Moved to hotspot, starting work...");
 				}
 			}
 			else
