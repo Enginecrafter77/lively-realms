@@ -69,8 +69,9 @@ public class EntityDwarf extends PathfinderMob {
 	public ItemStack getItemBySlot(EquipmentSlot slot)
 	{
 		return switch(slot) {
-			case MAINHAND -> new ItemStack(Items.GOLDEN_PICKAXE);
+			case MAINHAND -> new ItemStack(Items.IRON_PICKAXE);
 			case OFFHAND -> new ItemStack(Items.TORCH);
+			case HEAD -> new ItemStack(Items.GOLDEN_HELMET);
 			default -> super.getItemBySlot(slot);
 		};
 	}
@@ -106,6 +107,7 @@ public class EntityDwarf extends PathfinderMob {
 	{
 		super.tick();
 		this.findWorkTask();
+		this.updateSwingTime();
 	}
 
 	@Override

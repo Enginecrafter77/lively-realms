@@ -5,6 +5,7 @@ import dev.enginecrafter77.livelyrealms.entity.*;
 import dev.enginecrafter77.livelyrealms.entity.cap.*;
 import dev.enginecrafter77.livelyrealms.entity.client.DwarfRenderer;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelDwarf;
+import dev.enginecrafter77.livelyrealms.entity.model.ModelHumanoidDwarf;
 import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
 import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -149,6 +150,9 @@ public class LivelyRealmsMod {
         public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event)
         {
             event.registerLayerDefinition(ModelDwarf.LAYER_LOCATION, ModelDwarf::createBodyLayer);
+            event.registerLayerDefinition(ModelHumanoidDwarf.MODEL, ModelHumanoidDwarf::createBodyLayer);
+            event.registerLayerDefinition(ModelHumanoidDwarf.INNER_ARMOR, ModelHumanoidDwarf::createInnerArmorLayer);
+            event.registerLayerDefinition(ModelHumanoidDwarf.OUTER_ARMOR, ModelHumanoidDwarf::createOuterArmorLayer);
         }
 
         @SubscribeEvent

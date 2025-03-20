@@ -4,6 +4,7 @@ import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
 import dev.enginecrafter77.livelyrealms.entity.cap.AssignedWorkStep;
 import dev.enginecrafter77.livelyrealms.entity.cap.WorkHandler;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildStep;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -104,6 +105,7 @@ public class WorkOnMapGoal extends Goal {
 				step.action().perform(task.getContext());
 				holder.setAssignedStep(null);
 				this.state = State.DONE;
+				this.entity.swing(InteractionHand.MAIN_HAND);
 				LOGGER.info("Work finished");
 			}
 		}
