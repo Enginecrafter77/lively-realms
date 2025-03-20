@@ -1,5 +1,8 @@
 package dev.enginecrafter77.livelyrealms.items;
 
+import dev.enginecrafter77.livelyrealms.RandomRuleSelector;
+import dev.enginecrafter77.livelyrealms.RuleSelector;
+import dev.enginecrafter77.livelyrealms.WeightedRandomSelector;
 import dev.enginecrafter77.livelyrealms.generation.GenerationGridWorldData;
 import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
 import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
@@ -8,6 +11,7 @@ import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpressi
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaStructureLoader;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
@@ -20,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ItemGrammarWand extends Item {
 	public static final String EPSILON = MinecraftStructureMap.EPSILON;
@@ -45,18 +51,36 @@ public class ItemGrammarWand extends Item {
 
 			CellPosition position = new CellPosition();
 			map.getCellLocator().getEnclosingCell(context.getClickedPos(), position);
-			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().startingSymbol());
+			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().getDefaultStartingSymbol());
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
 		CellPosition cell = new CellPosition();
 		map.getCellLocator().getEnclosingCell(context.getClickedPos(), cell);
 
-		GrammarRule rule = grammar.rules().stream().filter(GrammarRule.applicable(map, cell)).findFirst().orElse(null);
-		if(rule == null)
+		// Use the adjacent cell if player is not crouching
+		if(!context.getPlayer().isCrouching())
+			cell.add(context.getClickedFace().getNormal());
+
+		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(map, cell).collect(Collectors.toList());
+		if(rules.isEmpty())
 			return InteractionResult.FAIL;
+		RuleSelector selector = WeightedRandomSelector.builder()
+				.beginSet()
+				.option("hallX2-east", 10)
+				.option("hallX-hall4-east", 1)
+				.endSet()
+				.beginSet()
+				.option("hallX2-west", 10)
+				.option("hallX-hall4-west", 1)
+				.endSet()
+				.build()
+				.or(new RandomRuleSelector());
+		int ruleIndex = selector.select(map.getGenerationProfile(), map, cell, rules);
+		Grammar.GrammarRuleEntry selectedRule = rules.get(ruleIndex);
+
 		SymbolAcceptor acceptor = map.getTaskTracker().mutationAcceptor();
-		rule.apply(acceptor, map, cell);
+		selectedRule.rule().apply(acceptor, map, cell);
 		grid.setDirty();
 
 		return InteractionResult.SUCCESS;
@@ -78,53 +102,28 @@ public class ItemGrammarWand extends Item {
 			Structure hub4 = loader.load(new File("lr-hub4.litematic").toPath());
 			Structure hallX = loader.load(new File("lr-hallx.litematic").toPath());
 			Structure hallZ = loader.load(new File("lr-hallz.litematic").toPath());
-			expressionRegistryBuilder.withCellSize(8).express("hall4", MultiblockExpression.of(hub4)).express("hallZ", MultiblockExpression.of(hallZ)).express("hallX", MultiblockExpression.of(hallX));
+			expressionRegistryBuilder
+					.withCellSize(8)
+					.express("hall4", MultiblockExpression.of(hub4))
+					.express("hallZ", MultiblockExpression.of(hallZ))
+					.express("hallX", MultiblockExpression.of(hallX));
 		}
 		catch(IOException exc)
 		{
 			throw new RuntimeException(exc);
 		}
 
-		builder.withRule(SubstitutionRule.builder()
-				.match(CellPosition.ORIGIN, Grammar.DEFAULT_STARTING_SYMBOL)
-				.put(CellPosition.ORIGIN, "hall4")
-				.build()
-			)
-			.withRule(SubstitutionRule.builder()
-					.match(CellPosition.ORIGIN, "hall4")
-					.match(CellPosition.of(1, 0, 0), EPSILON)
-					.match(CellPosition.of(-1, 0, 0), EPSILON)
-					.put(CellPosition.of(-1, 0, 0), "hallX")
-					.put(CellPosition.of(1, 0, 0), "hallX")
-					.build()
-			)
-			.withRule(SubstitutionRule.builder()
-					.match(CellPosition.ORIGIN, "hall4")
-					.match(CellPosition.of(0, 0, 1), EPSILON)
-					.match(CellPosition.of(0, 0, 2), EPSILON)
-					.put(CellPosition.of(0, 0, 1), "hallZ")
-					.put(CellPosition.of(0, 0, 2), "hall4")
-					.build()
-			)
-			.withRule(SubstitutionRule.builder()
-					.match(CellPosition.ORIGIN, "hall4")
-					.match(CellPosition.of(0, 0, -1), EPSILON)
-					.match(CellPosition.of(0, 0, -2), EPSILON)
-					.put(CellPosition.of(0, 0, -1), "hallZ")
-					.put(CellPosition.of(0, 0, -2), "hall4")
-					.build()
-			)
-			.withRule(SubstitutionRule.builder()
-					.match(CellPosition.ORIGIN, "hallX")
-					.match(CellPosition.of(-1, 0, 0), EPSILON)
-					.put(CellPosition.of(-1, 0, 0), "hallX")
-					.build()
-			)
-			.withRule(SubstitutionRule.builder()
-					.match(CellPosition.ORIGIN, "hallX")
-					.match(CellPosition.of(1, 0, 0), EPSILON)
-					.put(CellPosition.of(1, 0, 0), "hallX")
-					.build()
-		);
+		builder
+			.withRule("init", SingleSubstitutionRule.put("hall4").at(Grammar.DEFAULT_STARTING_SYMBOL).build())
+			.withRule("hall4-hallZ-north", SingleSubstitutionRule.put("hallZ").at(EPSILON).where(Direction.SOUTH, "hall4").where(Direction.NORTH, EPSILON).where(Direction.NORTH, EPSILON, 2).build())
+			.withRule("hall4-hallZ-south", SingleSubstitutionRule.put("hallZ").at(EPSILON).where(Direction.NORTH, "hall4").where(Direction.SOUTH, EPSILON).where(Direction.SOUTH, EPSILON, 2).build())
+			.withRule("hallZ-hall4-north", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.SOUTH, "hallZ").where(Direction.NORTH, EPSILON).build())
+			.withRule("hallZ-hall4-south", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.NORTH, "hallZ").where(Direction.SOUTH, EPSILON).build())
+			.withRule("hall4-hallX-east", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.WEST, "hall4").build())
+			.withRule("hall4-hallX-west", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.EAST, "hall4").build())
+			.withRule("hallX2-east", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.WEST, "hallX").build())
+			.withRule("hallX2-west", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.EAST, "hallX").build())
+			.withRule("hallX-hall4-west", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.EAST, "hallX").where(Direction.WEST, EPSILON).build())
+			.withRule("hallX-hall4-east", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.WEST, "hallX").where(Direction.EAST, EPSILON).build());
 	}
 }

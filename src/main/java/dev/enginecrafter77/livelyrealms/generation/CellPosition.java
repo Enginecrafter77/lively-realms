@@ -1,5 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
+import net.minecraft.core.Vec3i;
 import org.joml.Vector3i;
 
 public class CellPosition extends Vector3i implements ReadableCellPosition {
@@ -35,14 +36,31 @@ public class CellPosition extends Vector3i implements ReadableCellPosition {
 		dest.set(this);
 	}
 
-	public void anchor(int cellSize, Vector3i dest)
+	public Vector3i add(Vec3i vector)
 	{
-		dest.set(this);
-		dest.mul(cellSize);
+		this.x += vector.getX();
+		this.y += vector.getY();
+		this.z += vector.getZ();
+		return this;
+	}
+
+	public Vector3i set(Vec3i vector)
+	{
+		this.x = vector.getX();
+		this.y = vector.getY();
+		this.z = vector.getZ();
+		return this;
 	}
 
 	public static CellPosition of(int x, int y, int z)
 	{
 		return new CellPosition(x, y, z);
+	}
+
+	public static CellPosition copyOf(Vec3i from)
+	{
+		CellPosition pos = new CellPosition();
+		pos.set(from);
+		return pos;
 	}
 }

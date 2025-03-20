@@ -1,10 +1,9 @@
 package dev.enginecrafter77.livelyrealms;
 
+import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -26,6 +25,11 @@ public class WeightMap<T> {
 	public T at(double num)
 	{
 		return this.entries.get(this.vector.at(num));
+	}
+
+	public Set<T> options()
+	{
+		return ImmutableSet.copyOf(this.entries);
 	}
 
 	@Nullable

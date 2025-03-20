@@ -3,6 +3,7 @@ package dev.enginecrafter77.livelyrealms.generation;
 import dev.enginecrafter77.livelyrealms.generation.lattice.EnumerableSymbolLattice;
 import dev.enginecrafter77.livelyrealms.generation.lattice.LatticeCell;
 import dev.enginecrafter77.livelyrealms.generation.lattice.ReducedSymbolLattice;
+import net.minecraft.network.chat.Component;
 
 public class SubstitutionRule implements GrammarRule {
 	private final EnumerableSymbolLattice matchLattice;
@@ -33,6 +34,12 @@ public class SubstitutionRule implements GrammarRule {
 			insertPos.add(cell.getPosition());
 			acceptor.acceptSymbol(insertPos, symbol);
 		}
+	}
+
+	@Override
+	public Component describe()
+	{
+		return Component.literal("Replace " + this.matchLattice + " with " + this.replacement);
 	}
 
 	public static SubstitutionRuleBuilder builder()
