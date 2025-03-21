@@ -7,6 +7,7 @@ import dev.enginecrafter77.livelyrealms.entity.client.DwarfRenderer;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelDwarf;
 import dev.enginecrafter77.livelyrealms.entity.model.ModelHumanoidDwarf;
 import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
+import dev.enginecrafter77.livelyrealms.generation.loader.GenerationProfileLoader;
 import dev.enginecrafter77.livelyrealms.items.ItemInstantBuildWand;
 import dev.enginecrafter77.livelyrealms.items.ItemGrammarWand;
 import net.minecraft.client.renderer.entity.EntityRenderers;
@@ -55,6 +56,8 @@ public class LivelyRealmsMod {
     public static final String MODID = "livelyrealms";
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    public static final GenerationProfileLoader PROFILE_LOADER = new GenerationProfileLoader();
+
     public static final Registry<GenerationProfile> GENERATION_PROFILE_REGISTRY = new MappedRegistry<>(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MODID, "generation_profiles")), Lifecycle.stable());
 
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MODID);
@@ -74,7 +77,7 @@ public class LivelyRealmsMod {
 
     public static final DeferredItem<ItemGrammarWand> ITEM_GRAMMAR_WAND = ITEMS.registerItem("grammar_wand", (props) -> new ItemGrammarWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
     public static final DeferredItem<ItemInstantBuildWand> ITEM_INSTANT_BUILD_WANT = ITEMS.registerItem("instant_build_wand", props -> new ItemInstantBuildWand(props.component(DC_ASSOCIATED_GENERATION_MAP.get(), UUID.randomUUID())));
-    public static final DeferredHolder<GenerationProfile, GenerationProfile> SAMPLE_PROFILE = GENERATION_PROFILES.register("sample", GenerationProfile.using(ItemGrammarWand::configureGrammar));
+    public static final DeferredHolder<GenerationProfile, GenerationProfile> SAMPLE_PROFILE = GENERATION_PROFILES.register("sample", PROFILE_LOADER.loader());
 	public static final DeferredHolder<EntityType<?>, EntityType<EntityDwarf>> ENTITY_TYPE_DWARF = ENTITY_TYPES.register("dwarf", () -> EntityType.Builder.of(EntityDwarf::new, MobCategory.CREATURE).sized(0.75F, 1.5F).build("dwarf"));
 
     public LivelyRealmsMod(IEventBus modEventBus, ModContainer modContainer)

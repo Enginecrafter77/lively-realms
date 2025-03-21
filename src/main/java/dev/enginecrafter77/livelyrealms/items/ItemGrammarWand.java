@@ -93,37 +93,4 @@ public class ItemGrammarWand extends Item {
 		UUID map = stack.get(LivelyRealmsMod.DC_ASSOCIATED_GENERATION_MAP);
 		tooltipComponents.add(Component.literal(map == null ? "No map" : String.format("Map: %s", map)));
 	}
-
-	public static void configureGrammar(Grammar.GrammarBuilder builder, SymbolExpressionRegistry.SymbolExpressionRegistryBuilder expressionRegistryBuilder)
-	{
-		try
-		{
-			LitematicaStructureLoader loader = new LitematicaStructureLoader();
-			Structure hub4 = loader.load(new File("lr-hub4.litematic").toPath());
-			Structure hallX = loader.load(new File("lr-hallx.litematic").toPath());
-			Structure hallZ = loader.load(new File("lr-hallz.litematic").toPath());
-			expressionRegistryBuilder
-					.withCellSize(8)
-					.express("hall4", MultiblockExpression.of(hub4))
-					.express("hallZ", MultiblockExpression.of(hallZ))
-					.express("hallX", MultiblockExpression.of(hallX));
-		}
-		catch(IOException exc)
-		{
-			throw new RuntimeException(exc);
-		}
-
-		builder
-			.withRule("init", SingleSubstitutionRule.put("hall4").at(Grammar.DEFAULT_STARTING_SYMBOL).build())
-			.withRule("hall4-hallZ-north", SingleSubstitutionRule.put("hallZ").at(EPSILON).where(Direction.SOUTH, "hall4").where(Direction.NORTH, EPSILON).where(Direction.NORTH, EPSILON, 2).build())
-			.withRule("hall4-hallZ-south", SingleSubstitutionRule.put("hallZ").at(EPSILON).where(Direction.NORTH, "hall4").where(Direction.SOUTH, EPSILON).where(Direction.SOUTH, EPSILON, 2).build())
-			.withRule("hallZ-hall4-north", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.SOUTH, "hallZ").where(Direction.NORTH, EPSILON).build())
-			.withRule("hallZ-hall4-south", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.NORTH, "hallZ").where(Direction.SOUTH, EPSILON).build())
-			.withRule("hall4-hallX-east", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.WEST, "hall4").build())
-			.withRule("hall4-hallX-west", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.EAST, "hall4").build())
-			.withRule("hallX2-east", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.WEST, "hallX").build())
-			.withRule("hallX2-west", SingleSubstitutionRule.put("hallX").at(EPSILON).where(Direction.EAST, "hallX").build())
-			.withRule("hallX-hall4-west", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.EAST, "hallX").where(Direction.WEST, EPSILON).build())
-			.withRule("hallX-hall4-east", SingleSubstitutionRule.put("hall4").at(EPSILON).where(Direction.WEST, "hallX").where(Direction.EAST, EPSILON).build());
-	}
 }
