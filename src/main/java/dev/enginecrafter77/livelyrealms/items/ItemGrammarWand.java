@@ -51,7 +51,7 @@ public class ItemGrammarWand extends Item {
 
 			CellPosition position = new CellPosition();
 			map.getCellLocator().getEnclosingCell(context.getClickedPos(), position);
-			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().getDefaultStartingSymbol());
+			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().startingSymbol());
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
@@ -65,19 +65,13 @@ public class ItemGrammarWand extends Item {
 		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(map, cell).collect(Collectors.toList());
 		if(rules.isEmpty())
 			return InteractionResult.FAIL;
-		RuleSelector selector = WeightedRandomSelector.builder()
-				.beginSet()
-				.option("hallX2-east", 10)
-				.option("hallX-hall4-east", 1)
-				.endSet()
-				.beginSet()
-				.option("hallX2-west", 10)
-				.option("hallX-hall4-west", 1)
-				.endSet()
-				.build()
-				.or(new RandomRuleSelector());
-		int ruleIndex = selector.select(map.getGenerationProfile(), map, cell, rules);
-		Grammar.GrammarRuleEntry selectedRule = rules.get(ruleIndex);
+		Grammar.GrammarRuleEntry selectedRule = rules.getFirst();
+		if(rules.size() >= 2)
+		{
+			RuleSelector selector = grammar.ruleSelector().or(new RandomRuleSelector());
+			int ruleIndex = selector.select(map.getGenerationProfile(), map, cell, rules);
+			selectedRule = rules.get(ruleIndex);
+		}
 
 		SymbolAcceptor acceptor = map.getTaskTracker().mutationAcceptor();
 		selectedRule.rule().apply(acceptor, map, cell);

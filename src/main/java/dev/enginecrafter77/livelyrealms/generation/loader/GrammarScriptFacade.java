@@ -31,4 +31,12 @@ public class GrammarScriptFacade {
 		closure.run();
 		facade.evaluate();
 	}
+
+	public void selectors(@DelegatesTo(RuleSelectorFacade.class) Closure<?> closure)
+	{
+		RuleSelectorFacade facade = new RuleSelectorFacade();
+		closure.setDelegate(facade);
+		closure.run();
+		this.grammarBuilder.withRuleSelector(facade.assemble());
+	}
 }

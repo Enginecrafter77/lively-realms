@@ -1,42 +1,25 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import com.google.common.collect.ImmutableSet;
+import dev.enginecrafter77.livelyrealms.RandomRuleSelector;
+import dev.enginecrafter77.livelyrealms.RuleSelector;
 
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class Grammar {
+public record Grammar(Set<GrammarRuleEntry> rules, String startingSymbol, RuleSelector ruleSelector) {
 	public static final String DEFAULT_STARTING_SYMBOL = "start";
-
-	private final String startingSymbol;
-	private final Set<GrammarRuleEntry> rules;
-
-	private Grammar(Set<GrammarRuleEntry> rules, String startingSymbol)
-	{
-		this.startingSymbol = startingSymbol;
-		this.rules = rules;
-	}
-
-	public String getDefaultStartingSymbol()
-	{
-		return this.startingSymbol;
-	}
-
-	public Collection<GrammarRuleEntry> entries()
-	{
-		return this.rules;
-	}
 
 	public Optional<GrammarRuleEntry> findRule(String name)
 	{
-		return this.entries().stream().filter(r -> Objects.equals(r.name, name)).findAny();
+		return this.rules.stream().filter(r -> Objects.equals(r.name, name)).findAny();
 	}
 
 	public Stream<GrammarRuleEntry> findApplicableRules(GrammarContext context, ReadableCellPosition cell)
 	{
-		return this.entries().stream().filter(r -> r.rule().isApplicable(context, cell));
+		return this.rules.stream().filter(r -> r.rule().isApplicable(context, cell));
 	}
 
 	public static GrammarBuilder builder()
@@ -60,12 +43,20 @@ public class Grammar {
 	public static class GrammarBuilder
 	{
 		private final ImmutableSet.Builder<GrammarRuleEntry> ruleBuilder;
+		private RuleSelector ruleSelector;
 		private String startingSymbol;
 
 		public GrammarBuilder()
 		{
 			this.ruleBuilder = ImmutableSet.builder();
 			this.startingSymbol = DEFAULT_STARTING_SYMBOL;
+			this.ruleSelector = new RandomRuleSelector();
+		}
+
+		public GrammarBuilder withRuleSelector(RuleSelector ruleSelector)
+		{
+			this.ruleSelector = ruleSelector;
+			return this;
 		}
 
 		public GrammarBuilder withRule(@Nullable String name, GrammarRule rule)
@@ -87,7 +78,7 @@ public class Grammar {
 
 		public Grammar build()
 		{
-			return new Grammar(this.ruleBuilder.build(), this.startingSymbol);
+			return new Grammar(this.ruleBuilder.build(), this.startingSymbol, this.ruleSelector);
 		}
 	}
 }
