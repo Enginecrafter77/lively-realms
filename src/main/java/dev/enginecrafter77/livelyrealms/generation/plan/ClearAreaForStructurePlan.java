@@ -50,7 +50,8 @@ public class ClearAreaForStructurePlan extends BuildPlan {
 				++matchedIndex;
 			if(matchedIndex == stepIndex)
 			{
-				return new BuildStep(this, stepIndex, PlaceBlockAction.clear(new BlockPos(pos.x(), pos.y(), pos.z())));
+				BlockPos destPos = new BlockPos(pos.x(), pos.y(), pos.z());
+				return new BuildStep(this, stepIndex, new ClearForBlockAction(destPos, state));
 			}
 		}
 		throw new IndexOutOfBoundsException();
