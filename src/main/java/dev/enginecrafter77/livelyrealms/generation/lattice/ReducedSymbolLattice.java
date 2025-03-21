@@ -5,6 +5,7 @@ import dev.enginecrafter77.livelyrealms.generation.ImmutableCellPosition;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,11 +42,11 @@ public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
 
 	public static class ReducedSymbolLatticeBuilder
 	{
-		private final ImmutableMap.Builder<ImmutableCellPosition, String> overrides;
+		private final Map<ImmutableCellPosition, String> overrides;
 
 		public ReducedSymbolLatticeBuilder()
 		{
-			this.overrides = ImmutableMap.builder();
+			this.overrides = new HashMap<ImmutableCellPosition, String>();
 		}
 
 		public ReducedSymbolLatticeBuilder copy(EnumerableSymbolLattice lattice)
@@ -67,8 +68,7 @@ public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
 
 		public ReducedSymbolLattice build()
 		{
-			Map<ImmutableCellPosition, String> overrides = this.overrides.build();
-			return new ReducedSymbolLattice(overrides);
+			return new ReducedSymbolLattice(ImmutableMap.copyOf(this.overrides));
 		}
 	}
 }

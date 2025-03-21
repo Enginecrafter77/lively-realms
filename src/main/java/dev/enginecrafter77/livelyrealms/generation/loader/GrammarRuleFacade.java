@@ -2,6 +2,7 @@ package dev.enginecrafter77.livelyrealms.generation.loader;
 
 import dev.enginecrafter77.livelyrealms.generation.CellPosition;
 import dev.enginecrafter77.livelyrealms.generation.Grammar;
+import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
 import dev.enginecrafter77.livelyrealms.generation.SingleSubstitutionRule;
 import net.minecraft.core.Direction;
 
@@ -18,6 +19,9 @@ public class GrammarRuleFacade {
 		this.grammarBuilder = grammarBuilder;
 		this.builder = SingleSubstitutionRule.put(symbol);
 		this.name = null;
+
+		// Default to placing at empty space
+		this.at(MinecraftStructureMap.EPSILON);
 	}
 
 	public GrammarRuleFacade named(String name)
