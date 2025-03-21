@@ -4,18 +4,29 @@ import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpressi
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
+import net.minecraft.resources.ResourceLocation;
+
+import javax.annotation.Nullable;
 
 public class ExpressionSetFacade {
 	private final SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder;
+	@Nullable
+	private ResourceLocation ignoredBlock;
 
 	public ExpressionSetFacade(SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder)
 	{
 		this.builder = builder;
+		this.ignoredBlock = ResourceLocation.fromNamespaceAndPath("minecraft", "bedrock");
 	}
 
 	public void cellSize(int cellSize)
 	{
 		this.builder.withCellSize(cellSize);
+	}
+
+	public void ignoreBlock(String name)
+	{
+		this.ignoredBlock = ResourceLocation.parse(name);
 	}
 
 	public ExpressionFacade express(String symbol)
@@ -39,7 +50,7 @@ public class ExpressionSetFacade {
 
 		public void using(Structure structure)
 		{
-			this.using(MultiblockExpression.of(structure));
+			this.using(MultiblockExpression.of(structure, ignoredBlock));
 		}
 	}
 }
