@@ -16,8 +16,10 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, CellMutationContext, INBTSerializable<CompoundTag> {
+public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, CellMutationContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
 	public static final String EPSILON = "epsilon";
+
+	private final DirtyFlagHandler parentDirtyFlagHandler;
 
 	private final Level level;
 
@@ -37,9 +39,10 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 	@Nullable
 	private CellLocator cellLocator;
 
-	public MinecraftStructureMap(Level level)
+	public MinecraftStructureMap(Level level, DirtyFlagHandler parentDirtyFlagHandler)
 	{
-		this.taskTracker = new MapTaskTracker(this);
+		this.parentDirtyFlagHandler = parentDirtyFlagHandler;
+		this.taskTracker = new MapTaskTracker(this, this);
 		this.id = UUID.randomUUID();
 		this.level = level;
 		this.anchor = BlockPos.ZERO;
@@ -66,6 +69,12 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 	public MapTaskTracker getTaskTracker()
 	{
 		return this.taskTracker;
+	}
+
+	@Override
+	public void markDirty()
+	{
+		this.parentDirtyFlagHandler.markDirty();
 	}
 
 	@Override
@@ -131,9 +140,9 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		return this.symbolMap;
 	}
 
-	public static MinecraftStructureMap create(Level level, BlockPos anchor, ResourceLocation profile)
+	public static MinecraftStructureMap create(Level level, DirtyFlagHandler parentDirtyFlagHandler, BlockPos anchor, ResourceLocation profile)
 	{
-		MinecraftStructureMap map = new MinecraftStructureMap(level);
+		MinecraftStructureMap map = new MinecraftStructureMap(level, parentDirtyFlagHandler);
 		map.anchor = anchor;
 		map.profileName = profile;
 		return map;

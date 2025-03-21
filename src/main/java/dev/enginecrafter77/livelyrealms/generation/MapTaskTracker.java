@@ -13,10 +13,12 @@ import java.util.stream.Stream;
 public class MapTaskTracker implements INBTSerializable<ListTag> {
 	private final Map<ImmutableCellPosition, CellMutationTask> activeTasks;
 	private final CellMutationContext context;
+	private final DirtyFlagHandler dirtyFlagHandler;
 
-	public MapTaskTracker(CellMutationContext context)
+	public MapTaskTracker(CellMutationContext context, DirtyFlagHandler dirtyFlagHandler)
 	{
 		this.activeTasks = new HashMap<ImmutableCellPosition, CellMutationTask>();
+		this.dirtyFlagHandler = dirtyFlagHandler;
 		this.context = context;
 	}
 
@@ -26,6 +28,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 		if(this.activeTasks.containsKey(key))
 			throw new IllegalStateException(String.format("Cell at %s is already being mutated!", key));
 		this.activeTasks.put(key, task);
+		this.dirtyFlagHandler.markDirty();
 	}
 
 	@Nullable
@@ -37,6 +40,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 	public void removeTask(ReadableCellPosition position)
 	{
 		this.activeTasks.remove(ImmutableCellPosition.copyOf(position));
+		this.dirtyFlagHandler.markDirty();
 	}
 
 	public Collection<CellMutationTask> allTasks()
@@ -55,7 +59,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 			@Override
 			public void acceptSymbol(ReadableCellPosition cell, String symbol)
 			{
-				CellMutationTask task = CellMutationTask.create(MapTaskTracker.this.context, cell, symbol);
+				CellMutationTask task = CellMutationTask.create(MapTaskTracker.this.context, cell, symbol, MapTaskTracker.this.dirtyFlagHandler);
 				MapTaskTracker.this.registerTask(task);
 			}
 		};
@@ -80,7 +84,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 		for(int index = 0; index < tags.size(); ++index)
 		{
 			CompoundTag tag = tags.getCompound(index);
-			CellMutationTask task = new CellMutationTask(this.context);
+			CellMutationTask task = new CellMutationTask(this.context, this.dirtyFlagHandler);
 			task.deserializeNBT(provider, tag);
 			this.registerTask(task);
 		}

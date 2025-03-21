@@ -2,16 +2,15 @@ package dev.enginecrafter77.livelyrealms.generation;
 
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
 import dev.enginecrafter77.livelyrealms.generation.plan.*;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildContextOwner {
+	private final DirtyFlagHandler dirtyFlagHandler;
 	private final CellMutationContext gridContext;
 	private final CellPosition cellPosition;
 	private String toSymbol;
@@ -25,8 +24,9 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	@Nullable
 	private PlanInterpreter planInterpreter;
 
-	public CellMutationTask(CellMutationContext gridContext)
+	public CellMutationTask(CellMutationContext gridContext, DirtyFlagHandler dirtyFlagHandler)
 	{
+		this.dirtyFlagHandler = dirtyFlagHandler;
 		this.cellPosition = new CellPosition();
 		this.gridContext = gridContext;
 		this.toSymbol = MinecraftStructureMap.EPSILON;
@@ -70,10 +70,15 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return this.buildContext;
 	}
 
+	protected PlanInterpreter createInterpreter()
+	{
+		return new ContextAwarePlanInterpreter(this.getPlan(), this);
+	}
+
 	public PlanInterpreter getPlanInterpreter()
 	{
 		if(this.planInterpreter == null)
-			this.planInterpreter = new ContextAwarePlanInterpreter(this.getPlan(), this);
+			this.planInterpreter = new InterpretWrapper(this.createInterpreter());
 		return this.planInterpreter;
 	}
 
@@ -87,6 +92,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	public void commit()
 	{
 		this.gridContext.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
+		this.dirtyFlagHandler.markDirty();
 	}
 
 	public boolean isActive()
@@ -107,6 +113,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		if(newInterpreter.hasNextStep())
 		{
 			this.planInterpreter = newInterpreter;
+			this.dirtyFlagHandler.markDirty();
 			return false;
 		}
 		return true;
@@ -132,11 +139,53 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		this.getPlanInterpreter().restoreState(compoundTag);
 	}
 
-	public static CellMutationTask create(CellMutationContext context, ReadableCellPosition position, String toSymbol)
+	public static CellMutationTask create(CellMutationContext context, ReadableCellPosition position, String toSymbol, DirtyFlagHandler dirtyFlagHandler)
 	{
-		CellMutationTask task = new CellMutationTask(context);
+		CellMutationTask task = new CellMutationTask(context, dirtyFlagHandler);
 		task.cellPosition.set(position);
 		task.toSymbol = toSymbol;
 		return task;
+	}
+
+	private class InterpretWrapper implements PlanInterpreter
+	{
+		private final PlanInterpreter delegated;
+
+		public InterpretWrapper(PlanInterpreter delegated)
+		{
+			this.delegated = delegated;
+		}
+
+		@Override
+		public boolean hasNextStep()
+		{
+			return this.delegated.hasNextStep();
+		}
+
+		@Override
+		public BuildStep nextStep()
+		{
+			BuildStep next = this.delegated.nextStep();
+			CellMutationTask.this.dirtyFlagHandler.markDirty();
+			return next;
+		}
+
+		@Override
+		public @Nullable BuildStep lastStep()
+		{
+			return this.delegated.lastStep();
+		}
+
+		@Override
+		public void saveState(CompoundTag tag)
+		{
+			this.delegated.saveState(tag);
+		}
+
+		@Override
+		public void restoreState(CompoundTag tag)
+		{
+			this.delegated.restoreState(tag);
+		}
 	}
 }

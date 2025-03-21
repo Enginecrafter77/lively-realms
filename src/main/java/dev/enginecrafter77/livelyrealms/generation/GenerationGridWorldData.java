@@ -7,7 +7,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -19,7 +18,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
-public class GenerationGridWorldData extends SavedData {
+public class GenerationGridWorldData extends SavedData implements DirtyFlagHandler {
 	private final Map<UUID, MinecraftStructureMap> maps;
 	private final Level level;
 
@@ -31,10 +30,16 @@ public class GenerationGridWorldData extends SavedData {
 
 	public MinecraftStructureMap createMap(BlockPos anchor, Holder<GenerationProfile> profile)
 	{
-		MinecraftStructureMap map = MinecraftStructureMap.create(this.level, anchor, profile.unwrapKey().map(ResourceKey::location).orElseThrow());
+		MinecraftStructureMap map = MinecraftStructureMap.create(this.level, this, anchor, profile.unwrapKey().map(ResourceKey::location).orElseThrow());
 		this.maps.put(map.getId(), map);
 		this.setDirty();
 		return map;
+	}
+
+	@Override
+	public void markDirty()
+	{
+		this.setDirty();
 	}
 
 	@Nullable
@@ -55,7 +60,7 @@ public class GenerationGridWorldData extends SavedData {
 		for(int index = 0; index < mapList.size(); ++index)
 		{
 			CompoundTag mapTag = mapList.getCompound(index);
-			MinecraftStructureMap map = new MinecraftStructureMap(level);
+			MinecraftStructureMap map = new MinecraftStructureMap(level, data);
 			map.deserializeNBT(provider, mapTag);
 			data.maps.put(map.getId(), map);
 		}
