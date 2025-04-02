@@ -78,7 +78,13 @@ public class SubstitutionRule implements GrammarRule {
 
 		public SubstitutionRule build()
 		{
-			return new SubstitutionRule(this.matchBuilder.build(), this.replacementBuilder.build());
+			ReducedSymbolLattice match = this.matchBuilder.build();
+			ReducedSymbolLattice replacement = this.replacementBuilder.build();
+			if(match.getPositions().isEmpty())
+				throw new IllegalStateException("Match lattice cannot be empty!");
+			if(replacement.getPositions().isEmpty())
+				throw new IllegalStateException("Replacement lattice cannot be empty!");
+			return new SubstitutionRule(match, replacement);
 		}
 	}
 }
