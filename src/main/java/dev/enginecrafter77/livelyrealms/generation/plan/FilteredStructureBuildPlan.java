@@ -1,72 +1,49 @@
 package dev.enginecrafter77.livelyrealms.generation.plan;
 
 import com.google.common.base.Predicates;
-import dev.enginecrafter77.livelyrealms.VectorSpaceIterator;
 import dev.enginecrafter77.livelyrealms.structure.NaturalVoxelIndexer;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
+import dev.enginecrafter77.livelyrealms.structure.VoxelIndexer;
 import net.minecraft.world.level.block.state.BlockState;
+import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
 import java.util.function.Predicate;
 
 public abstract class FilteredStructureBuildPlan extends BuildPlan {
 	private final Predicate<BlockState> filter;
-	private final int filteredStepCount;
-
+	private final VoxelIndexer indexer;
 	protected final Structure structure;
 
 	public FilteredStructureBuildPlan(Structure structure)
 	{
-		this.filteredStepCount = NaturalVoxelIndexer.in(structure.getSize()).volume();
-		this.filter = Predicates.alwaysTrue();
-		this.structure = structure;
+		this(structure, Predicates.alwaysTrue());
 	}
 
 	public FilteredStructureBuildPlan(Structure structure, Predicate<BlockState> filter)
 	{
-		this.filteredStepCount = this.calculateFilteredStepCount();
+		this.indexer = NaturalVoxelIndexer.in(structure.getSize());
 		this.structure = structure;
 		this.filter = filter;
 	}
 
 	protected abstract BuildStepAction getActionFor(Vector3ic position);
 
-	private int calculateFilteredStepCount()
-	{
-		int matching = 0;
-		VectorSpaceIterator iterator = new VectorSpaceIterator(this.structure.getSize());
-		while(iterator.hasNext())
-		{
-			Vector3ic pos = iterator.next();
-			Structure.StructureBlock block = this.structure.getBlockAt(pos);
-			BlockState state = block.getBlockState();
-			if(this.filter.test(state))
-				++matching;
-		}
-		return matching;
-	}
-
 	@Override
-	public BuildStep getStep(int stepIndex)
+	public BuildStepAction getStepAction(int stepIndex)
 	{
-		int matchedIndex = -1;
-		VectorSpaceIterator iterator = new VectorSpaceIterator(this.structure.getSize());
-		while(iterator.hasNext())
-		{
-			Vector3ic pos = iterator.next();
-			Structure.StructureBlock block = this.structure.getBlockAt(pos);
-			BlockState state = block.getBlockState();
-			if(this.filter.test(state))
-				++matchedIndex;
-			if(matchedIndex == stepIndex)
-				return new BuildStep(this, stepIndex, this.getActionFor(pos));
-		}
-		throw new IndexOutOfBoundsException();
+		Vector3i pos = new Vector3i();
+		this.indexer.fromIndex(stepIndex, pos);
+		Structure.StructureBlock block = this.structure.getBlockAt(pos);
+		BlockState state = block.getBlockState();
+		if(!this.filter.test(state))
+			return NoopAction.INSTANCE;
+		return this.getActionFor(pos);
 	}
 
 	@Override
 	public int getStepCount()
 	{
-		return this.filteredStepCount;
+		return this.indexer.volume();
 	}
 }

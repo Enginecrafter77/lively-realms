@@ -1,13 +1,8 @@
 package dev.enginecrafter77.livelyrealms.generation.plan;
 
 public abstract class BuildPlan {
-	public abstract BuildStep getStep(int stepIndex);
+	public abstract BuildStepAction getStepAction(int stepIndex);
 	public abstract int getStepCount();
-
-	protected BuildStep makeStep(int index, BuildStepAction action)
-	{
-		return new BuildStep(this, index, action);
-	}
 
 	public BuildPlan partial(float from, float to)
 	{
@@ -25,6 +20,11 @@ public abstract class BuildPlan {
 		return new PartialBuildPlan(this, from, to);
 	}
 
+	public BuildStep getStep(int stepIndex)
+	{
+		return new BuildStep(this, stepIndex, this.getStepAction(stepIndex));
+	}
+
 	private static class PartialBuildPlan extends BuildPlan
 	{
 		private final BuildPlan fullPlan;
@@ -39,9 +39,9 @@ public abstract class BuildPlan {
 		}
 
 		@Override
-		public BuildStep getStep(int stepIndex)
+		public BuildStepAction getStepAction(int stepIndex)
 		{
-			return this.fullPlan.getStep(this.from + stepIndex);
+			return this.fullPlan.getStepAction(this.from + stepIndex);
 		}
 
 		@Override

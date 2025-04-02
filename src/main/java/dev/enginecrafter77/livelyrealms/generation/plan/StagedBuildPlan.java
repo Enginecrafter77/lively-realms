@@ -15,7 +15,7 @@ public class StagedBuildPlan extends BuildPlan {
 	}
 
 	@Override
-	public BuildStep getStep(int stepIndex)
+	public BuildStepAction getStepAction(int stepIndex)
 	{
 		int stageStepIndex = stepIndex;
 		for(BuildPlan stage : this.stages)
@@ -23,7 +23,7 @@ public class StagedBuildPlan extends BuildPlan {
 			if(stage.getStepCount() > stageStepIndex)
 			{
 				BuildStep stageStep = stage.getStep(stageStepIndex);
-				return new BuildStep(this, stepIndex, stageStep.action());
+				return stageStep.action();
 			}
 			stageStepIndex -= stage.getStepCount();
 		}

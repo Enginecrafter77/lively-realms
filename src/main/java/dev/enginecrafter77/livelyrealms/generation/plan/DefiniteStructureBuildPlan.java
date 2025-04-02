@@ -19,6 +19,12 @@ public class DefiniteStructureBuildPlan extends BuildPlan {
 	}
 
 	@Override
+	public BuildStepAction getStepAction(int stepIndex)
+	{
+		return this.getStep(stepIndex).action();
+	}
+
+	@Override
 	public int getStepCount()
 	{
 		return this.steps.size();

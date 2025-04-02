@@ -19,6 +19,12 @@ public class ConjureBuildPlan extends BuildPlan {
 	}
 
 	@Override
+	public BuildStepAction getStepAction(int stepIndex)
+	{
+		return this.getStep(stepIndex).action();
+	}
+
+	@Override
 	public int getStepCount()
 	{
 		return 1;
