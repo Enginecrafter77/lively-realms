@@ -7,10 +7,9 @@ import org.joml.Vector3d;
 import org.joml.Vector3i;
 import org.joml.Vector3ic;
 
-@SuppressWarnings("ClassCanBeRecord")
 public final class ContinuousCellLocator implements CellLocator {
-	public final BlockPos anchor;
-	public final int cellSize;
+	private final BlockPos anchor;
+	private final int cellSize;
 
 	public ContinuousCellLocator(BlockPos anchor, int cellSize)
 	{
