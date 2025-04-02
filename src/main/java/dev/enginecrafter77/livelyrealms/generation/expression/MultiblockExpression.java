@@ -6,8 +6,6 @@ import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
 import dev.enginecrafter77.livelyrealms.generation.plan.StagedBuildPlan;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
@@ -27,10 +25,10 @@ public class MultiblockExpression implements SymbolExpression {
 	@Override
 	public BuildPlan getBuildPlan()
 	{
-		return StagedBuildPlan.of(new ClearAreaForStructurePlan(this.struct, this::shouldBlockBeCleared), new SimpleStructureBuildPlan(this.struct));
+		return StagedBuildPlan.of(new ClearAreaForStructurePlan(this.struct, this::isExplicitBlock), new SimpleStructureBuildPlan(this.struct, this::isExplicitBlock));
 	}
 
-	private boolean shouldBlockBeCleared(BlockState state)
+	private boolean isExplicitBlock(BlockState state)
 	{
 		if(this.ignoredBlock == null)
 			return true;

@@ -1,32 +1,28 @@
 package dev.enginecrafter77.livelyrealms.generation.plan;
 
-import dev.enginecrafter77.livelyrealms.structure.NaturalVoxelIndexer;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
-import dev.enginecrafter77.livelyrealms.structure.VoxelIndexer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3i;
+import org.joml.Vector3ic;
 
-public class SimpleStructureBuildPlan extends BuildPlan {
-	private final Structure structure;
-	private final VoxelIndexer voxelIndexer;
+import java.util.function.Predicate;
+
+public class SimpleStructureBuildPlan extends FilteredStructureBuildPlan {
+	public SimpleStructureBuildPlan(Structure structure, Predicate<BlockState> predicate)
+	{
+		super(structure, predicate);
+	}
 
 	public SimpleStructureBuildPlan(Structure structure)
 	{
-		this.structure = structure;
-		this.voxelIndexer = NaturalVoxelIndexer.in(structure.getSize());
+		super(structure);
 	}
 
 	@Override
-	public int getStepCount()
+	protected BuildStepAction getActionFor(Vector3ic position)
 	{
-		return this.voxelIndexer.volume();
-	}
-
-	@Override
-	public BuildStep getStep(int stepIndex)
-	{
-		Vector3i position = new Vector3i();
-		this.voxelIndexer.fromIndex(stepIndex, position);
-		return this.makeStep(stepIndex, new PlaceBlockAction(new BlockPos(position.x, position.y, position.z), structure.getBlockAt(position).getBlockState()));
+		BlockPos pos = new BlockPos(position.x(), position.y(), position.z());
+		return new PlaceBlockAction(pos, this.structure.getBlockAt(position).getBlockState());
 	}
 }
