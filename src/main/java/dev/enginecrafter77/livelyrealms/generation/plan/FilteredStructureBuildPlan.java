@@ -2,6 +2,7 @@ package dev.enginecrafter77.livelyrealms.generation.plan;
 
 import com.google.common.base.Predicates;
 import dev.enginecrafter77.livelyrealms.VectorSpaceIterator;
+import dev.enginecrafter77.livelyrealms.structure.NaturalVoxelIndexer;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3ic;
@@ -16,14 +17,16 @@ public abstract class FilteredStructureBuildPlan extends BuildPlan {
 
 	public FilteredStructureBuildPlan(Structure structure)
 	{
-		this(structure, Predicates.alwaysTrue());
+		this.filteredStepCount = NaturalVoxelIndexer.in(structure.getSize()).volume();
+		this.filter = Predicates.alwaysTrue();
+		this.structure = structure;
 	}
 
 	public FilteredStructureBuildPlan(Structure structure, Predicate<BlockState> filter)
 	{
-		this.filter = filter;
-		this.structure = structure;
 		this.filteredStepCount = this.calculateFilteredStepCount();
+		this.structure = structure;
+		this.filter = filter;
 	}
 
 	protected abstract BuildStepAction getActionFor(Vector3ic position);
