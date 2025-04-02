@@ -2,7 +2,7 @@ package dev.enginecrafter77.livelyrealms.generation;
 
 import dev.enginecrafter77.livelyrealms.generation.lattice.EnumerableSymbolLattice;
 import dev.enginecrafter77.livelyrealms.generation.lattice.LatticeCell;
-import dev.enginecrafter77.livelyrealms.generation.lattice.ReducedSymbolLattice;
+import dev.enginecrafter77.livelyrealms.generation.lattice.SparseSymbolLattice;
 import net.minecraft.network.chat.Component;
 
 public class SubstitutionRule implements GrammarRule {
@@ -49,13 +49,13 @@ public class SubstitutionRule implements GrammarRule {
 
 	public static class SubstitutionRuleBuilder
 	{
-		private final ReducedSymbolLattice.ReducedSymbolLatticeBuilder matchBuilder;
-		private final ReducedSymbolLattice.ReducedSymbolLatticeBuilder replacementBuilder;
+		private final SparseSymbolLattice.SparseSymbolLatticeBuilder matchBuilder;
+		private final SparseSymbolLattice.SparseSymbolLatticeBuilder replacementBuilder;
 
 		public SubstitutionRuleBuilder()
 		{
-			this.matchBuilder = ReducedSymbolLattice.builder();
-			this.replacementBuilder = ReducedSymbolLattice.builder();
+			this.matchBuilder = SparseSymbolLattice.builder();
+			this.replacementBuilder = SparseSymbolLattice.builder();
 		}
 
 		public SubstitutionRuleBuilder match(ReadableCellPosition position, String symbol)
@@ -78,8 +78,8 @@ public class SubstitutionRule implements GrammarRule {
 
 		public SubstitutionRule build()
 		{
-			ReducedSymbolLattice match = this.matchBuilder.build();
-			ReducedSymbolLattice replacement = this.replacementBuilder.build();
+			SparseSymbolLattice match = this.matchBuilder.build();
+			SparseSymbolLattice replacement = this.replacementBuilder.build();
 			if(match.getPositions().isEmpty())
 				throw new IllegalStateException("Match lattice cannot be empty!");
 			if(replacement.getPositions().isEmpty())

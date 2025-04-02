@@ -1,11 +1,9 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import dev.enginecrafter77.livelyrealms.generation.lattice.EnumerableSymbolLattice;
-import dev.enginecrafter77.livelyrealms.generation.lattice.ReducedSymbolLattice;
+import dev.enginecrafter77.livelyrealms.generation.lattice.SparseSymbolLattice;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.Vec3;
 
 public record SingleSubstitutionRule(EnumerableSymbolLattice condition, String output) implements GrammarRule {
 	@Override
@@ -38,12 +36,12 @@ public record SingleSubstitutionRule(EnumerableSymbolLattice condition, String o
 
 	public static class SingleSubstitutionRuleBuilder
 	{
-		private final ReducedSymbolLattice.ReducedSymbolLatticeBuilder matchBuilder;
+		private final SparseSymbolLattice.SparseSymbolLatticeBuilder matchBuilder;
 		private final String output;
 
 		public SingleSubstitutionRuleBuilder(String output)
 		{
-			this.matchBuilder = ReducedSymbolLattice.builder();
+			this.matchBuilder = SparseSymbolLattice.builder();
 			this.output = output;
 		}
 

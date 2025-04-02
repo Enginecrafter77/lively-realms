@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
+public final class SparseSymbolLattice extends EnumerableSymbolLattice {
 	private final Map<ImmutableCellPosition, String> overrides;
 
-	public ReducedSymbolLattice(Map<ImmutableCellPosition, String> overrides)
+	public SparseSymbolLattice(Map<ImmutableCellPosition, String> overrides)
 	{
 		this.overrides = overrides;
 	}
@@ -30,26 +30,26 @@ public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
 		return this.overrides.keySet();
 	}
 
-	public ReducedSymbolLatticeBuilder edit()
+	public SparseSymbolLatticeBuilder edit()
 	{
-		return ReducedSymbolLattice.builder().copy(this);
+		return SparseSymbolLattice.builder().copy(this);
 	}
 
-	public static ReducedSymbolLatticeBuilder builder()
+	public static SparseSymbolLatticeBuilder builder()
 	{
-		return new ReducedSymbolLatticeBuilder();
+		return new SparseSymbolLatticeBuilder();
 	}
 
-	public static class ReducedSymbolLatticeBuilder
+	public static class SparseSymbolLatticeBuilder
 	{
 		private final Map<ImmutableCellPosition, String> overrides;
 
-		public ReducedSymbolLatticeBuilder()
+		public SparseSymbolLatticeBuilder()
 		{
 			this.overrides = new HashMap<ImmutableCellPosition, String>();
 		}
 
-		public ReducedSymbolLatticeBuilder copy(EnumerableSymbolLattice lattice)
+		public SparseSymbolLatticeBuilder copy(EnumerableSymbolLattice lattice)
 		{
 			for(LatticeCell cell : lattice)
 			{
@@ -60,15 +60,15 @@ public final class ReducedSymbolLattice extends EnumerableSymbolLattice {
 			return this;
 		}
 
-		public ReducedSymbolLatticeBuilder set(ReadableCellPosition position, String symbol)
+		public SparseSymbolLatticeBuilder set(ReadableCellPosition position, String symbol)
 		{
 			this.overrides.put(ImmutableCellPosition.copyOf(position), symbol);
 			return this;
 		}
 
-		public ReducedSymbolLattice build()
+		public SparseSymbolLattice build()
 		{
-			return new ReducedSymbolLattice(ImmutableMap.copyOf(this.overrides));
+			return new SparseSymbolLattice(ImmutableMap.copyOf(this.overrides));
 		}
 	}
 }
