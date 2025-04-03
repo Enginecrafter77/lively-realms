@@ -48,43 +48,38 @@ public class LitematicaBitVector implements IntIterable, INBTSerializable<LongAr
 
     public void set(int index, int value)
     {
-        // I don't really feel confident reproducing this, so I copied it from https://github.com/maruohon/litematica/blob/08423854c5b647e4268633bc5b511d1c50a27f38/src/main/java/litematica/schematic/container/LitematicaBitArray.java
         checkValueRange(value);
 
-        long startOffset = index * (long) this.bitsPerEntry;
-        int startArrIndex = (int) (startOffset >> 6); // startOffset / 64
-        int endArrIndex = (int) (((index + 1L) * (long) this.bitsPerEntry - 1L) >> 6);
-        int startBitOffset = (int) (startOffset & 0x3F); // startOffset % 64
-        this.data[startArrIndex] = this.data[startArrIndex] & ~(this.entryMask << startBitOffset) | ((long)value & this.entryMask) << startBitOffset;
+        int startBit = index * this.bitsPerEntry;
+        int endBit = ((index+1) * this.bitsPerEntry) - 1;
+        int startIndex = startBit >> 6; // =/64
+        int endIndex = endBit >> 6; // =/64
+        int startEntryBit = startBit & 0x3F; // =%64
 
-        if(startArrIndex != endArrIndex)
-        {
-            int endOffset = 64 - startBitOffset;
-            int j1 = this.bitsPerEntry - endOffset;
-            this.data[endArrIndex] = this.data[endArrIndex] >>> j1 << j1 | ((long)value & this.entryMask) >> endOffset;
-        }
+        int startWritten = 64 - startEntryBit;
+        long startMask = this.entryMask << startEntryBit;
+        long endMask = this.entryMask >>> startWritten;
+        long startBits = ((long)value << startEntryBit) & startMask;
+        long endBits = ((long)value >>> startWritten) & endMask;
+        this.data[startIndex] &= ~startMask;
+        this.data[startIndex] |= startBits;
+        this.data[endIndex] &= ~endMask;
+        this.data[endIndex] |= endBits;
     }
 
     public int get(int index)
     {
-        // I don't really feel confident reproducing this, so I copied it from https://github.com/maruohon/litematica/blob/08423854c5b647e4268633bc5b511d1c50a27f38/src/main/java/litematica/schematic/container/LitematicaBitArray.java
-        long startOffset = index * (long) this.bitsPerEntry;
-        int startArrIndex = (int)(startOffset >> 6); // startOffset / 64
-        int endArrIndex = (int) (((index + 1L) * (long) this.bitsPerEntry - 1L) >> 6);
-        int startBitOffset = (int) (startOffset & 0x3F); // startOffset % 64
+        int startBit = index * this.bitsPerEntry;
+        int endBit = ((index+1) * this.bitsPerEntry) - 1;
+        int startIndex = startBit >> 6; // =/64
+        int endIndex = endBit >> 6; // =/64
+        int startEntryBit = startBit & 0x3F; // =%64
 
-        int value;
-        if(startArrIndex == endArrIndex)
-        {
-            value = (int)(this.data[startArrIndex] >>> startBitOffset & this.entryMask);
-        }
-        else
-        {
-            int endOffset = 64 - startBitOffset;
-            value = (int)((this.data[startArrIndex] >>> startBitOffset | this.data[endArrIndex] << endOffset) & this.entryMask);
-        }
-
-        return value;
+        long soup = this.data[startIndex] >>> startEntryBit;
+        if(startIndex != endIndex)
+            soup |= this.data[endIndex] << (64 - startEntryBit);
+        soup &= this.entryMask;
+        return (int)soup;
     }
 
     @Nonnull
