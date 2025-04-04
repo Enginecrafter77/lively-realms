@@ -1,5 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
+import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -53,16 +54,22 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 		return this.allTasks().stream().filter(CellMutationTask::isActive);
 	}
 
+	private void acceptSymbol(ReadableCellPosition cell, String symbol)
+	{
+		SymbolExpression expression = this.context.getGenerationProfile().expressionProvider().getExpression(symbol);
+		if(expression == null)
+		{
+			// symbol has no expression, just insert it
+			this.context.getSymbolMap().setSymbolAt(cell, symbol);
+			return;
+		}
+		CellMutationTask task = CellMutationTask.create(this.context, cell, symbol, this.dirtyFlagHandler);
+		this.registerTask(task);
+	}
+
 	public SymbolAcceptor mutationAcceptor()
 	{
-		return new SymbolAcceptor() {
-			@Override
-			public void acceptSymbol(ReadableCellPosition cell, String symbol)
-			{
-				CellMutationTask task = CellMutationTask.create(MapTaskTracker.this.context, cell, symbol, MapTaskTracker.this.dirtyFlagHandler);
-				MapTaskTracker.this.registerTask(task);
-			}
-		};
+		return this::acceptSymbol;
 	}
 
 	@UnknownNullability
