@@ -1,6 +1,5 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
-import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpression;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
@@ -72,9 +71,14 @@ public class ExpressionSetFacade {
 			ExpressionSetFacade.this.builder.express(this.symbol, expression);
 		}
 
+		public void using(BuildPlan plan)
+		{
+			this.using(() -> plan);
+		}
+
 		public void using(Structure structure)
 		{
-			this.using(MultiblockExpression.of(structure, ignoredBlock));
+			this.using(new StructureExpression(structure));
 		}
 	}
 
