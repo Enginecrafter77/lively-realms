@@ -44,12 +44,11 @@ public class ExpressionSetFacade {
 		return new ExpressionFacade(symbol);
 	}
 
-	public SymbolExpression structure(String path)
+	public Structure structure(String path)
 	{
 		try
 		{
-			Structure structure = LOADER.load(new File(path).toPath());
-			return new StructureExpression(structure);
+			return LOADER.load(new File(path).toPath());
 		}
 		catch(IOException exc)
 		{
