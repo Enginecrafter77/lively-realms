@@ -16,7 +16,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, CellMutationContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
+public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, GeneratorContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
 	public static final String EPSILON = "epsilon";
 
 	private final DirtyFlagHandler parentDirtyFlagHandler;

@@ -11,7 +11,7 @@ import java.util.NoSuchElementException;
 
 public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildContextOwner {
 	private final DirtyFlagHandler dirtyFlagHandler;
-	private final CellMutationContext gridContext;
+	private final GeneratorContext generatorContext;
 	private final CellPosition cellPosition;
 	private String toSymbol;
 
@@ -24,11 +24,11 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	@Nullable
 	private PlanInterpreter planInterpreter;
 
-	public CellMutationTask(CellMutationContext gridContext, DirtyFlagHandler dirtyFlagHandler)
+	public CellMutationTask(GeneratorContext generatorContext, DirtyFlagHandler dirtyFlagHandler)
 	{
 		this.dirtyFlagHandler = dirtyFlagHandler;
 		this.cellPosition = new CellPosition();
-		this.gridContext = gridContext;
+		this.generatorContext = generatorContext;
 		this.toSymbol = MinecraftStructureMap.EPSILON;
 		this.planInterpreter = null;
 		this.buildContext = null;
@@ -49,7 +49,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 	{
 		if(this.plan == null)
 		{
-			SymbolExpression expression = this.gridContext.getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
+			SymbolExpression expression = this.generatorContext.getGenerationProfile().expressionProvider().getExpression(this.toSymbol);
 			if(expression == null)
 				throw new NoSuchElementException();
 			this.plan = expression.getBuildPlan();
@@ -57,16 +57,16 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		return this.plan;
 	}
 
-	public CellMutationContext getGridContext()
+	public GeneratorContext getGeneratorContext()
 	{
-		return this.gridContext;
+		return this.generatorContext;
 	}
 
 	@Override
 	public BuildContext getContext()
 	{
 		if(this.buildContext == null)
-			this.buildContext = this.gridContext.makeBuildContext(this.cellPosition);
+			this.buildContext = this.generatorContext.makeBuildContext(this.cellPosition);
 		return this.buildContext;
 	}
 
@@ -91,7 +91,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 
 	public void commit()
 	{
-		this.gridContext.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
+		this.generatorContext.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
 		this.dirtyFlagHandler.markDirty();
 	}
 
@@ -139,7 +139,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		this.getPlanInterpreter().restoreState(compoundTag);
 	}
 
-	public static CellMutationTask create(CellMutationContext context, ReadableCellPosition position, String toSymbol, DirtyFlagHandler dirtyFlagHandler)
+	public static CellMutationTask create(GeneratorContext context, ReadableCellPosition position, String toSymbol, DirtyFlagHandler dirtyFlagHandler)
 	{
 		CellMutationTask task = new CellMutationTask(context, dirtyFlagHandler);
 		task.cellPosition.set(position);

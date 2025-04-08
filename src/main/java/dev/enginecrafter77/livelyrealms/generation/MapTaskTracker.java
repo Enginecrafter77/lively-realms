@@ -13,10 +13,10 @@ import java.util.stream.Stream;
 
 public class MapTaskTracker implements INBTSerializable<ListTag> {
 	private final Map<ImmutableCellPosition, CellMutationTask> activeTasks;
-	private final CellMutationContext context;
+	private final GeneratorContext context;
 	private final DirtyFlagHandler dirtyFlagHandler;
 
-	public MapTaskTracker(CellMutationContext context, DirtyFlagHandler dirtyFlagHandler)
+	public MapTaskTracker(GeneratorContext context, DirtyFlagHandler dirtyFlagHandler)
 	{
 		this.activeTasks = new HashMap<ImmutableCellPosition, CellMutationTask>();
 		this.dirtyFlagHandler = dirtyFlagHandler;
@@ -56,6 +56,9 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 
 	private void acceptSymbol(ReadableCellPosition cell, String symbol)
 	{
+		if(this.context.getSymbolMap().getSymbolAt(cell).equals(symbol))
+			return; // Do nothing, symbol is already there
+
 		SymbolExpression expression = this.context.getGenerationProfile().expressionProvider().getExpression(symbol);
 		if(expression == null)
 		{

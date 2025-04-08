@@ -23,7 +23,7 @@ public class ClosestTaskComparator implements Comparator<CellMutationTask> {
 
 	private void getCellCenter(CellMutationTask task, Vector3d out)
 	{
-		GenerationProfile profile = task.getGridContext().getGenerationProfile();
+		GenerationProfile profile = task.getGeneratorContext().getGenerationProfile();
 		int cellSize = profile.expressionProvider().getCellSize();
 		BuildContext context = task.getContext();
 		BlockPos anchor = context.anchor();
