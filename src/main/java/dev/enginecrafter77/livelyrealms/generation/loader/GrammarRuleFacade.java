@@ -1,23 +1,24 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
-import dev.enginecrafter77.livelyrealms.generation.CellPosition;
-import dev.enginecrafter77.livelyrealms.generation.Grammar;
-import dev.enginecrafter77.livelyrealms.generation.MinecraftStructureMap;
-import dev.enginecrafter77.livelyrealms.generation.SingleSubstitutionRule;
+import com.google.common.collect.ImmutableSet;
+import dev.enginecrafter77.livelyrealms.generation.*;
 import net.minecraft.core.Direction;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 
 public class GrammarRuleFacade {
 	private final Grammar.GrammarBuilder grammarBuilder;
-	private final SingleSubstitutionRule.SingleSubstitutionRuleBuilder builder;
+	private final CellNeighborhoodMatcher.CellNeighborhoodMatcherBuilder matcherBuilder;
+	private final String symbol;
 	@Nullable
 	private String name;
 
 	public GrammarRuleFacade(Grammar.GrammarBuilder grammarBuilder, String symbol)
 	{
 		this.grammarBuilder = grammarBuilder;
-		this.builder = SingleSubstitutionRule.put(symbol);
+		this.matcherBuilder = CellNeighborhoodMatcher.builder();
+		this.symbol = symbol;
 		this.name = null;
 
 		// Default to placing at empty space
@@ -32,15 +33,18 @@ public class GrammarRuleFacade {
 
 	public GrammarRuleFacade at(String symbol)
 	{
-		this.builder.at(symbol);
+		this.matcherBuilder.match(ImmutableCellPosition.ZERO).equals(symbol);
 		return this;
+	}
+
+	public GrammarRuleFacade when(CellMatcher matcher)
+	{
+		return new WhereClauseConfiguration().matches(matcher);
 	}
 
 	public WhereClauseConfiguration where(Direction direction)
 	{
-		WhereClauseConfiguration def = new WhereClauseConfiguration();
-		def.then(direction);
-		return def;
+		return (new WhereClauseConfiguration()).then(direction);
 	}
 
 	public WhereClauseConfiguration and(Direction direction)
@@ -50,7 +54,8 @@ public class GrammarRuleFacade {
 
 	void push()
 	{
-		this.grammarBuilder.withRule(this.name, this.builder.build());
+		GrammarRule rule = new SingleSubstitutionRule(this.matcherBuilder.build(), this.symbol);
+		this.grammarBuilder.withRule(this.name, rule);
 	}
 
 	public class WhereClauseConfiguration
@@ -82,7 +87,17 @@ public class GrammarRuleFacade {
 
 		public GrammarRuleFacade is(String symbol)
 		{
-			GrammarRuleFacade.this.builder.where(this.offset, symbol);
+			return this.matches(CellMatcher.isSymbol(symbol));
+		}
+
+		public GrammarRuleFacade in(Collection<String> symbols)
+		{
+			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(symbols)));
+		}
+
+		public GrammarRuleFacade matches(CellMatcher matcher)
+		{
+			GrammarRuleFacade.this.matcherBuilder.match(this.offset).using(matcher);
 			return GrammarRuleFacade.this;
 		}
 	}
