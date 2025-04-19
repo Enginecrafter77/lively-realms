@@ -2,10 +2,7 @@ package dev.enginecrafter77.livelyrealms;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedSet;
-import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
-import dev.enginecrafter77.livelyrealms.generation.Grammar;
-import dev.enginecrafter77.livelyrealms.generation.GrammarContext;
-import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
+import dev.enginecrafter77.livelyrealms.generation.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -21,7 +18,7 @@ public class WeightedRandomSelector implements RuleSelector {
 	}
 
 	@Override
-	public int select(GenerationProfile profile, GrammarContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+	public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
 	{
 		List<String> ruleNames = availableRules.stream().filter(Grammar.GrammarRuleEntry::isNamed).map(Grammar.GrammarRuleEntry::name).toList();
 		SelectorSet set = this.selectorSets.stream()

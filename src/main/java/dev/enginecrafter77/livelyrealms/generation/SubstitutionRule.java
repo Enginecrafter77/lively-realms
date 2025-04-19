@@ -16,13 +16,13 @@ public class SubstitutionRule implements GrammarRule {
 	}
 
 	@Override
-	public boolean isApplicable(GrammarContext context, ReadableCellPosition position)
+	public boolean isApplicable(GeneratorContext context, ReadableCellPosition position)
 	{
-		return this.matchLattice.match(context.getEnvironment(), position);
+		return this.matchLattice.match(context.getSymbolMap(), position);
 	}
 
 	@Override
-	public void apply(SymbolAcceptor acceptor, GrammarContext context, ReadableCellPosition position)
+	public void apply(SymbolAcceptor acceptor, GeneratorContext context, ReadableCellPosition position)
 	{
 		CellPosition insertPos = new CellPosition();
 		for(LatticeCell cell : this.replacement)

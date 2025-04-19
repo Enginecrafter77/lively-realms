@@ -16,7 +16,7 @@ import org.jetbrains.annotations.UnknownNullability;
 import javax.annotation.Nonnull;
 import java.util.UUID;
 
-public class MinecraftStructureMap implements GrammarContext, GenerationProfileHolder, GeneratorContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
+public class MinecraftStructureMap implements GenerationProfileHolder, GeneratorContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
 	public static final String EPSILON = "epsilon";
 
 	private final DirtyFlagHandler parentDirtyFlagHandler;
@@ -132,12 +132,6 @@ public class MinecraftStructureMap implements GrammarContext, GenerationProfileH
 		this.anchor = new BlockPos(anchorArray[0], anchorArray[1], anchorArray[2]);
 		this.taskTracker.deserializeNBT(provider, compoundTag.getList("tasks", Tag.TAG_COMPOUND));
 		this.invalidateCachedObjects();
-	}
-
-	@Override
-	public SymbolLattice getEnvironment()
-	{
-		return this.symbolMap;
 	}
 
 	public static MinecraftStructureMap create(Level level, DirtyFlagHandler parentDirtyFlagHandler, BlockPos anchor, ResourceLocation profile)

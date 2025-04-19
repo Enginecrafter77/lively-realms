@@ -1,14 +1,11 @@
 package dev.enginecrafter77.livelyrealms;
 
-import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
-import dev.enginecrafter77.livelyrealms.generation.Grammar;
-import dev.enginecrafter77.livelyrealms.generation.GrammarContext;
-import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
+import dev.enginecrafter77.livelyrealms.generation.*;
 
 import java.util.List;
 
 public interface RuleSelector {
-	public int select(GenerationProfile profile, GrammarContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules);
+	public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules);
 
 	public default RuleSelector or(RuleSelector other)
 	{

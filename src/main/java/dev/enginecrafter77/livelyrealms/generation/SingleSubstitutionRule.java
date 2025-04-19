@@ -7,13 +7,13 @@ import net.minecraft.network.chat.Component;
 
 public record SingleSubstitutionRule(EnumerableSymbolLattice condition, String output) implements GrammarRule {
 	@Override
-	public boolean isApplicable(GrammarContext context, ReadableCellPosition position)
+	public boolean isApplicable(GeneratorContext context, ReadableCellPosition position)
 	{
-		return this.condition.match(context.getEnvironment(), position);
+		return this.condition.match(context.getSymbolMap(), position);
 	}
 
 	@Override
-	public void apply(SymbolAcceptor acceptor, GrammarContext context, ReadableCellPosition position)
+	public void apply(SymbolAcceptor acceptor, GeneratorContext context, ReadableCellPosition position)
 	{
 		acceptor.acceptSymbol(position, this.output);
 	}

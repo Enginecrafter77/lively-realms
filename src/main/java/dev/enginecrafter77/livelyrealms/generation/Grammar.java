@@ -17,7 +17,7 @@ public record Grammar(Set<GrammarRuleEntry> rules, String startingSymbol, RuleSe
 		return this.rules.stream().filter(r -> Objects.equals(r.name, name)).findAny();
 	}
 
-	public Stream<GrammarRuleEntry> findApplicableRules(GrammarContext context, ReadableCellPosition cell)
+	public Stream<GrammarRuleEntry> findApplicableRules(GeneratorContext context, ReadableCellPosition cell)
 	{
 		return this.rules.stream().filter(r -> r.rule().isApplicable(context, cell));
 	}
