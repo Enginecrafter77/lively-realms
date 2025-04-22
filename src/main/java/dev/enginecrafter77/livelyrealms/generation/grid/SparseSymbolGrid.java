@@ -1,4 +1,4 @@
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import com.google.common.collect.ImmutableMap;
 import dev.enginecrafter77.livelyrealms.generation.ImmutableCellPosition;
@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public final class SparseSymbolLattice extends EnumerableSymbolLattice {
+public final class SparseSymbolGrid extends EnumerableSymbolGrid {
 	private final Map<ImmutableCellPosition, String> overrides;
 
-	public SparseSymbolLattice(Map<ImmutableCellPosition, String> overrides)
+	public SparseSymbolGrid(Map<ImmutableCellPosition, String> overrides)
 	{
 		this.overrides = overrides;
 	}
@@ -30,28 +30,28 @@ public final class SparseSymbolLattice extends EnumerableSymbolLattice {
 		return this.overrides.keySet();
 	}
 
-	public SparseSymbolLatticeBuilder edit()
+	public SparseSymbolGridBuilder edit()
 	{
-		return SparseSymbolLattice.builder().copy(this);
+		return SparseSymbolGrid.builder().copy(this);
 	}
 
-	public static SparseSymbolLatticeBuilder builder()
+	public static SparseSymbolGridBuilder builder()
 	{
-		return new SparseSymbolLatticeBuilder();
+		return new SparseSymbolGridBuilder();
 	}
 
-	public static class SparseSymbolLatticeBuilder
+	public static class SparseSymbolGridBuilder
 	{
 		private final Map<ImmutableCellPosition, String> overrides;
 
-		public SparseSymbolLatticeBuilder()
+		public SparseSymbolGridBuilder()
 		{
 			this.overrides = new HashMap<ImmutableCellPosition, String>();
 		}
 
-		public SparseSymbolLatticeBuilder copy(EnumerableSymbolLattice lattice)
+		public SparseSymbolGridBuilder copy(EnumerableSymbolGrid lattice)
 		{
-			for(LatticeCell cell : lattice)
+			for(GridCell cell : lattice)
 			{
 				if(cell.getSymbol() == null)
 					continue;
@@ -60,15 +60,15 @@ public final class SparseSymbolLattice extends EnumerableSymbolLattice {
 			return this;
 		}
 
-		public SparseSymbolLatticeBuilder set(ReadableCellPosition position, String symbol)
+		public SparseSymbolGridBuilder set(ReadableCellPosition position, String symbol)
 		{
 			this.overrides.put(ImmutableCellPosition.copyOf(position), symbol);
 			return this;
 		}
 
-		public SparseSymbolLattice build()
+		public SparseSymbolGrid build()
 		{
-			return new SparseSymbolLattice(ImmutableMap.copyOf(this.overrides));
+			return new SparseSymbolGrid(ImmutableMap.copyOf(this.overrides));
 		}
 	}
 }

@@ -1,6 +1,6 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

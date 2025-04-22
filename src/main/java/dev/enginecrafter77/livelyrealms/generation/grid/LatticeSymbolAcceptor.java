@@ -1,12 +1,12 @@
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 import dev.enginecrafter77.livelyrealms.generation.SymbolAcceptor;
 
 public class LatticeSymbolAcceptor implements SymbolAcceptor {
-	private final MutableSymbolLattice target;
+	private final MutableSymbolGrid target;
 
-	public LatticeSymbolAcceptor(MutableSymbolLattice target)
+	public LatticeSymbolAcceptor(MutableSymbolGrid target)
 	{
 		this.target = target;
 	}
@@ -17,7 +17,7 @@ public class LatticeSymbolAcceptor implements SymbolAcceptor {
 		this.target.setSymbolAt(cell, symbol);
 	}
 
-	public static LatticeSymbolAcceptor to(MutableSymbolLattice target)
+	public static LatticeSymbolAcceptor to(MutableSymbolGrid target)
 	{
 		return new LatticeSymbolAcceptor(target);
 	}

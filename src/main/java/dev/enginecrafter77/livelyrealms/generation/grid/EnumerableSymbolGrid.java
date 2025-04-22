@@ -1,4 +1,4 @@
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import com.google.common.base.Predicates;
 import dev.enginecrafter77.livelyrealms.generation.CellPosition;
@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class EnumerableSymbolLattice implements SymbolLattice, Iterable<LatticeCell> {
+public abstract class EnumerableSymbolGrid implements SymbolGrid, Iterable<GridCell> {
 	public abstract Set<? extends ReadableCellPosition> getPositions();
 
 	public Set<String> getPalette()
@@ -20,15 +20,15 @@ public abstract class EnumerableSymbolLattice implements SymbolLattice, Iterable
 
 	@NotNull
 	@Override
-	public Iterator<LatticeCell> iterator()
+	public Iterator<GridCell> iterator()
 	{
 		return new LatticeIterator(this.getPositions().iterator());
 	}
 
-	public boolean match(SymbolLattice in, ReadableCellPosition at)
+	public boolean match(SymbolGrid in, ReadableCellPosition at)
 	{
 		CellPosition position = new CellPosition();
-		for(LatticeCell cell : this)
+		for(GridCell cell : this)
 		{
 			position.set(cell.getPosition());
 			position.add(at);
@@ -39,15 +39,15 @@ public abstract class EnumerableSymbolLattice implements SymbolLattice, Iterable
 		return true;
 	}
 
-	protected class LatticeIterator implements Iterator<LatticeCell>
+	protected class LatticeIterator implements Iterator<GridCell>
 	{
 		private final Iterator<? extends ReadableCellPosition> positions;
-		private final LatticeCellCursor cursor;
+		private final GridCellCursor cursor;
 
 		public LatticeIterator(Iterator<? extends ReadableCellPosition> positions)
 		{
 			this.positions = positions;
-			this.cursor = new LatticeCellCursor();
+			this.cursor = new GridCellCursor();
 		}
 
 		@Override
@@ -57,10 +57,10 @@ public abstract class EnumerableSymbolLattice implements SymbolLattice, Iterable
 		}
 
 		@Override
-		public LatticeCell next()
+		public GridCell next()
 		{
 			ReadableCellPosition position = this.positions.next();
-			String symbol = EnumerableSymbolLattice.this.getSymbolAt(position);
+			String symbol = EnumerableSymbolGrid.this.getSymbolAt(position);
 			this.cursor.update(position, symbol);
 			return this.cursor;
 		}

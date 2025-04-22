@@ -1,15 +1,13 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import com.google.common.collect.ImmutableList;
-import dev.enginecrafter77.livelyrealms.generation.lattice.MutableSparseSymbolLattice;
-import dev.enginecrafter77.livelyrealms.generation.lattice.MutableSymbolLattice;
-import dev.enginecrafter77.livelyrealms.generation.lattice.SymbolLattice;
+import dev.enginecrafter77.livelyrealms.generation.grid.MutableSparseSymbolGrid;
+import dev.enginecrafter77.livelyrealms.generation.grid.MutableSymbolGrid;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaBitVector;
 import dev.enginecrafter77.livelyrealms.structure.NaturalVoxelIndexer;
 import dev.enginecrafter77.livelyrealms.structure.VoxelIndexer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -19,24 +17,23 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Vector;
 import java.util.stream.Collectors;
 
-public class VirtualStructureMap implements MutableSymbolLattice, INBTSerializable<CompoundTag> {
-	private final MutableSparseSymbolLattice lattice;
+public class VirtualStructureMap implements MutableSymbolGrid, INBTSerializable<CompoundTag> {
+	private final MutableSparseSymbolGrid grid;
 
 	@Nonnull
 	private final String epsilon;
 
 	public VirtualStructureMap(@Nonnull String epsilon)
 	{
-		this.lattice = new MutableSparseSymbolLattice();
+		this.grid = new MutableSparseSymbolGrid();
 		this.epsilon = epsilon;
 	}
 
 	public Set<String> symbolSet()
 	{
-		Set<String> symbols = this.lattice.getPositions().stream().map(this::getSymbolAt).collect(Collectors.toSet());
+		Set<String> symbols = this.grid.getPositions().stream().map(this::getSymbolAt).collect(Collectors.toSet());
 		symbols.add(this.epsilon);
 		return symbols;
 	}
@@ -45,7 +42,7 @@ public class VirtualStructureMap implements MutableSymbolLattice, INBTSerializab
 	{
 		Vector3i min = new Vector3i(0, 0, 0);
 		Vector3i max = new Vector3i(0, 0, 0);
-		for(ReadableCellPosition position : this.lattice.getPositions())
+		for(ReadableCellPosition position : this.grid.getPositions())
 		{
 			min.min(position);
 			max.max(position);
@@ -64,13 +61,13 @@ public class VirtualStructureMap implements MutableSymbolLattice, INBTSerializab
 			return;
 		if(Objects.equals(symbol, this.epsilon))
 			symbol = null;
-		this.lattice.setSymbolAt(position, symbol);
+		this.grid.setSymbolAt(position, symbol);
 	}
 
 	@Override
 	public String getSymbolAt(ReadableCellPosition position)
 	{
-		String symbol = this.lattice.getSymbolAt(position);
+		String symbol = this.grid.getSymbolAt(position);
 		if(symbol == null)
 			return this.epsilon;
 		return symbol;

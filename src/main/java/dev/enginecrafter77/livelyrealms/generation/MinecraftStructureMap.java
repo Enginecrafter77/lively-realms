@@ -3,7 +3,6 @@ package dev.enginecrafter77.livelyrealms.generation;
 import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
 import dev.enginecrafter77.livelyrealms.generation.expression.CellLocator;
 import dev.enginecrafter77.livelyrealms.generation.expression.ContinuousCellLocator;
-import dev.enginecrafter77.livelyrealms.generation.lattice.SymbolLattice;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.*;

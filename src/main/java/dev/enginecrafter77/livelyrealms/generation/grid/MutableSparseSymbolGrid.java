@@ -1,4 +1,4 @@
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import dev.enginecrafter77.livelyrealms.generation.ImmutableCellPosition;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class MutableSparseSymbolLattice extends EnumerableSymbolLattice implements MutableSymbolLattice {
+public class MutableSparseSymbolGrid extends EnumerableSymbolGrid implements MutableSymbolGrid {
 	private final Map<ReadableCellPosition, @NonNull String> symbolMap;
 
-	public MutableSparseSymbolLattice()
+	public MutableSparseSymbolGrid()
 	{
 		this.symbolMap = new HashMap<ReadableCellPosition, String>();
 	}

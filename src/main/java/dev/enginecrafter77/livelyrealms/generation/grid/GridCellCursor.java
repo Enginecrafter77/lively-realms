@@ -1,16 +1,16 @@
-package dev.enginecrafter77.livelyrealms.generation.lattice;
+package dev.enginecrafter77.livelyrealms.generation.grid;
 
 import dev.enginecrafter77.livelyrealms.generation.CellPosition;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 
 import javax.annotation.Nullable;
 
-public class LatticeCellCursor implements LatticeCell {
+public class GridCellCursor implements GridCell {
 	private final CellPosition position;
 	@Nullable
 	private String symbol;
 
-	public LatticeCellCursor()
+	public GridCellCursor()
 	{
 		this.position = new CellPosition();
 		this.symbol = null;
