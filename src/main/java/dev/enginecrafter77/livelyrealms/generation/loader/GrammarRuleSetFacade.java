@@ -1,6 +1,7 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
 import dev.enginecrafter77.livelyrealms.generation.Grammar;
+import dev.enginecrafter77.livelyrealms.generation.GrammarRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,5 +27,15 @@ public class GrammarRuleSetFacade {
 		GrammarRuleFacade facade = new GrammarRuleFacade(this.grammarBuilder, symbol);
 		this.activeBuilders.add(facade);
 		return facade;
+	}
+
+	public void use(GrammarRule rule)
+	{
+		this.grammarBuilder.withRule(rule);
+	}
+
+	public void use(GrammarRule rule, String named)
+	{
+		this.grammarBuilder.withRule(named, rule);
 	}
 }
