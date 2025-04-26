@@ -2,10 +2,13 @@ package dev.enginecrafter77.livelyrealms.generation.loader;
 
 import com.google.common.collect.ImmutableSet;
 import dev.enginecrafter77.livelyrealms.generation.*;
+import groovy.lang.Closure;
+import groovy.lang.DelegatesTo;
 import net.minecraft.core.Direction;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public class GrammarRuleFacade {
 	private final Grammar.GrammarBuilder grammarBuilder;
@@ -40,6 +43,16 @@ public class GrammarRuleFacade {
 	public GrammarRuleFacade when(CellMatcher matcher)
 	{
 		return new WhereClauseConfiguration().matches(matcher);
+	}
+
+	public GrammarRuleFacade when(Consumer<CellMatcherEnvironment> action)
+	{
+		return new WhereClauseConfiguration().matches(action);
+	}
+
+	public GrammarRuleFacade when(@DelegatesTo(CellMatcherEnvironment.class) Closure<?> closure)
+	{
+		return new WhereClauseConfiguration().matches(closure);
 	}
 
 	public WhereClauseConfiguration where(Direction direction)
@@ -99,6 +112,17 @@ public class GrammarRuleFacade {
 		{
 			GrammarRuleFacade.this.matcherBuilder.match(this.offset).using(matcher);
 			return GrammarRuleFacade.this;
+		}
+
+		public GrammarRuleFacade matches(Consumer<CellMatcherEnvironment> action)
+		{
+			return this.matches(CellMatcherEnvironment.wrap(action));
+		}
+
+		public GrammarRuleFacade matches(@DelegatesTo(CellMatcherEnvironment.class) Closure<?> closure)
+		{
+			closure.setResolveStrategy(Closure.DELEGATE_FIRST);
+			return this.matches(ClosureConsumerAction.make(closure));
 		}
 	}
 }
