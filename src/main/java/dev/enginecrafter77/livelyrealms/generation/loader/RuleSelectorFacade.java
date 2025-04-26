@@ -39,11 +39,11 @@ public class RuleSelectorFacade {
 
 	private RuleSelector compoundAuxSelector()
 	{
-		return (profile, context, expansionFor, availableRules) -> {
+		return (context, expansionFor, availableRules) -> {
 			int ret;
 			for(RuleSelector selector : this.auxiliarySelectors)
 			{
-				ret = selector.select(profile, context, expansionFor, availableRules);
+				ret = selector.select(context, expansionFor, availableRules);
 				if(ret != -1)
 					return ret;
 			}

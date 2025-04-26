@@ -1,7 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
 import dev.enginecrafter77.livelyrealms.RuleSelector;
-import dev.enginecrafter77.livelyrealms.generation.GenerationProfile;
 import dev.enginecrafter77.livelyrealms.generation.GeneratorContext;
 import dev.enginecrafter77.livelyrealms.generation.Grammar;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
@@ -11,16 +10,14 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class RuleSelectorEnvironment {
-	public final GenerationProfile profile;
 	public final GeneratorContext context;
 	public final ReadableCellPosition position;
 	public final List<Grammar.GrammarRuleEntry> rules;
 
 	private int selected;
 
-	public RuleSelectorEnvironment(GenerationProfile profile, GeneratorContext context, ReadableCellPosition position, List<Grammar.GrammarRuleEntry> rules)
+	public RuleSelectorEnvironment(GeneratorContext context, ReadableCellPosition position, List<Grammar.GrammarRuleEntry> rules)
 	{
-		this.profile = profile;
 		this.context = context;
 		this.position = position;
 		this.rules = rules;
@@ -82,9 +79,9 @@ public class RuleSelectorEnvironment {
 		}
 
 		@Override
-		public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+		public int select(GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
 		{
-			RuleSelectorEnvironment delegate = new RuleSelectorEnvironment(profile, context, expansionFor, availableRules);
+			RuleSelectorEnvironment delegate = new RuleSelectorEnvironment(context, expansionFor, availableRules);
 			this.action.accept(delegate);
 			return delegate.selected;
 		}

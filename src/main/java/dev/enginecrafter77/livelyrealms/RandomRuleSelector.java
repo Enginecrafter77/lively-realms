@@ -19,7 +19,7 @@ public class RandomRuleSelector implements RuleSelector {
 	}
 
 	@Override
-	public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+	public int select(GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
 	{
 		return this.rng.nextInt(availableRules.size());
 	}

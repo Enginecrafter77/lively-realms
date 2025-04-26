@@ -18,7 +18,7 @@ public class WeightedRandomSelector implements RuleSelector {
 	}
 
 	@Override
-	public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+	public int select(GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
 	{
 		List<String> ruleNames = availableRules.stream().filter(Grammar.GrammarRuleEntry::isNamed).map(Grammar.GrammarRuleEntry::name).toList();
 		SelectorSet set = this.selectorSets.stream()

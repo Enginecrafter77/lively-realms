@@ -69,7 +69,7 @@ public class ItemGrammarWand extends Item {
 		if(rules.size() >= 2)
 		{
 			RuleSelector selector = grammar.ruleSelector().or(new RandomRuleSelector());
-			int ruleIndex = selector.select(map.getGenerationProfile(), map, cell, rules);
+			int ruleIndex = selector.select(map, cell, rules);
 			selectedRule = rules.get(ruleIndex);
 		}
 
