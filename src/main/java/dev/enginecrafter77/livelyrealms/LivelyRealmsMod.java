@@ -57,6 +57,7 @@ public class LivelyRealmsMod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final GenerationProfileLoader PROFILE_LOADER = new GenerationProfileLoader();
+    public static final StructureMapUpdater MAP_UPDATER = new StructureMapUpdater();
 
     public static final Registry<GenerationProfile> GENERATION_PROFILE_REGISTRY = new MappedRegistry<>(ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(MODID, "generation_profiles")), Lifecycle.stable());
 
@@ -90,7 +91,7 @@ public class LivelyRealmsMod {
         DATA_COMPONENT_TYPES.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
         ATTACHMENT_TYPES.register(modEventBus);
-        NeoForge.EVENT_BUS.register(StructureMapUpdater.class);
+        NeoForge.EVENT_BUS.register(MAP_UPDATER);
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
