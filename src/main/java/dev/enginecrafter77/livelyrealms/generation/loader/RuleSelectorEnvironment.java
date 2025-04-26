@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-public class RuleSelectorContext {
+public class RuleSelectorEnvironment {
 	public final GenerationProfile profile;
 	public final GeneratorContext context;
 	public final ReadableCellPosition position;
@@ -18,7 +18,7 @@ public class RuleSelectorContext {
 
 	private int selected;
 
-	public RuleSelectorContext(GenerationProfile profile, GeneratorContext context, ReadableCellPosition position, List<Grammar.GrammarRuleEntry> rules)
+	public RuleSelectorEnvironment(GenerationProfile profile, GeneratorContext context, ReadableCellPosition position, List<Grammar.GrammarRuleEntry> rules)
 	{
 		this.profile = profile;
 		this.context = context;
@@ -67,16 +67,16 @@ public class RuleSelectorContext {
 		this.reset();
 	}
 
-	static RuleSelector wrap(Consumer<RuleSelectorContext> action)
+	static RuleSelector wrap(Consumer<RuleSelectorEnvironment> action)
 	{
-		return new RuleSelectorContextConsumer(action);
+		return new EnvironmentConfiguringSelector(action);
 	}
 
-	public static class RuleSelectorContextConsumer implements RuleSelector
+	public static class EnvironmentConfiguringSelector implements RuleSelector
 	{
-		private final Consumer<RuleSelectorContext> action;
+		private final Consumer<RuleSelectorEnvironment> action;
 
-		public RuleSelectorContextConsumer(Consumer<RuleSelectorContext> action)
+		public EnvironmentConfiguringSelector(Consumer<RuleSelectorEnvironment> action)
 		{
 			this.action = action;
 		}
@@ -84,7 +84,7 @@ public class RuleSelectorContext {
 		@Override
 		public int select(GenerationProfile profile, GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
 		{
-			RuleSelectorContext delegate = new RuleSelectorContext(profile, context, expansionFor, availableRules);
+			RuleSelectorEnvironment delegate = new RuleSelectorEnvironment(profile, context, expansionFor, availableRules);
 			this.action.accept(delegate);
 			return delegate.selected;
 		}

@@ -7,7 +7,6 @@ import groovy.lang.DelegatesTo;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class RuleSelectorFacade {
 	private final WeightedRandomSelector.WeightedRandomSelectorBuilder weightedRandomSelectorBuilder;
@@ -32,10 +31,10 @@ public class RuleSelectorFacade {
 		this.auxiliarySelectors.add(ruleSelector);
 	}
 
-	public void selector(@DelegatesTo(RuleSelectorContext.class) Closure<?> closure)
+	public void selector(@DelegatesTo(RuleSelectorEnvironment.class) Closure<?> closure)
 	{
 		closure.setResolveStrategy(Closure.DELEGATE_FIRST);
-		this.auxiliarySelectors.add(RuleSelectorContext.wrap(ClosureConsumerAction.make(closure)));
+		this.auxiliarySelectors.add(RuleSelectorEnvironment.wrap(ClosureConsumerAction.make(closure)));
 	}
 
 	private RuleSelector compoundAuxSelector()
