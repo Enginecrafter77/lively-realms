@@ -1,5 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
+import dev.enginecrafter77.livelyrealms.generation.CellMatcher;
 import dev.enginecrafter77.livelyrealms.generation.Grammar;
 import dev.enginecrafter77.livelyrealms.generation.GrammarRule;
 
@@ -29,13 +30,25 @@ public class GrammarRuleSetFacade {
 		return facade;
 	}
 
-	public void use(GrammarRule rule)
+	public void include(GrammarRule rule)
 	{
 		this.grammarBuilder.withRule(rule);
 	}
 
-	public void use(GrammarRule rule, String named)
+	public void include(GrammarRule rule, String named)
 	{
 		this.grammarBuilder.withRule(named, rule);
+	}
+
+	// CellMatcher factories
+
+	public CellMatcher not(CellMatcher other)
+	{
+		return other.not();
+	}
+
+	public CellMatcher exists(String symbol)
+	{
+		return CellMatcher.symbolExists(symbol);
 	}
 }

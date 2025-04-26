@@ -12,20 +12,23 @@ import java.util.function.Consumer;
 
 public class GrammarRuleFacade {
 	private final Grammar.GrammarBuilder grammarBuilder;
-	private final CellNeighborhoodMatcher.CellNeighborhoodMatcherBuilder matcherBuilder;
 	private final String symbol;
+
+	@Nullable
+	private CellMatcher matcher;
+
 	@Nullable
 	private String name;
+
+	private String at;
 
 	public GrammarRuleFacade(Grammar.GrammarBuilder grammarBuilder, String symbol)
 	{
 		this.grammarBuilder = grammarBuilder;
-		this.matcherBuilder = CellNeighborhoodMatcher.builder();
+		this.matcher = null;
 		this.symbol = symbol;
+		this.at = MinecraftStructureMap.EPSILON; // Default to placing at empty space
 		this.name = null;
-
-		// Default to placing at empty space
-		this.at(MinecraftStructureMap.EPSILON);
 	}
 
 	public GrammarRuleFacade named(String name)
@@ -36,62 +39,86 @@ public class GrammarRuleFacade {
 
 	public GrammarRuleFacade at(String symbol)
 	{
-		this.matcherBuilder.match(ImmutableCellPosition.ZERO).equals(symbol);
+		this.at = symbol;
 		return this;
 	}
 
 	public GrammarRuleFacade when(CellMatcher matcher)
 	{
-		return new WhereClauseConfiguration().matches(matcher);
+		this.matcher = matcher;
+		return this;
 	}
 
 	public GrammarRuleFacade when(Consumer<CellMatcherEnvironment> action)
 	{
-		return new WhereClauseConfiguration().matches(action);
+		return this.when(CellMatcherEnvironment.wrap(action));
 	}
 
 	public GrammarRuleFacade when(@DelegatesTo(CellMatcherEnvironment.class) Closure<?> closure)
 	{
-		return new WhereClauseConfiguration().matches(closure);
+		closure.setResolveStrategy(Closure.DELEGATE_FIRST);
+		return this.when(ClosureConsumerAction.make(closure));
 	}
 
-	public WhereClauseConfiguration where(Direction direction)
+	public GrammarRuleFacade and(CellMatcher matcher)
 	{
-		return (new WhereClauseConfiguration()).then(direction);
+		if(this.matcher == null)
+			return this.when(matcher);
+		this.matcher = this.matcher.and(matcher);
+		return this;
 	}
 
-	public WhereClauseConfiguration and(Direction direction)
+	public GrammarRuleFacade and(Consumer<CellMatcherEnvironment> action)
 	{
-		return this.where(direction);
+		return this.and(CellMatcherEnvironment.wrap(action));
+	}
+
+	public GrammarRuleFacade and(@DelegatesTo(CellMatcherEnvironment.class) Closure<?> closure)
+	{
+		closure.setResolveStrategy(Closure.DELEGATE_FIRST);
+		return this.and(ClosureConsumerAction.make(closure));
+	}
+
+	public OffsetMatcherBuilder where(Direction direction)
+	{
+		return (new OffsetMatcherBuilder()).then(direction);
+	}
+
+	public OffsetMatcherBuilder and(Direction direction)
+	{
+		return (new OffsetMatcherBuilder()).then(direction);
 	}
 
 	void push()
 	{
-		GrammarRule rule = new SingleSubstitutionRule(this.matcherBuilder.build(), this.symbol);
+		CellMatcher matcher = CellMatcher.isSymbol(this.at);
+		if(this.matcher != null)
+			matcher = matcher.and(this.matcher);
+		GrammarRule rule = new SingleSubstitutionRule(matcher, this.symbol);
 		this.grammarBuilder.withRule(this.name, rule);
 	}
 
-	public class WhereClauseConfiguration
+	public class OffsetMatcherBuilder
 	{
 		private final CellPosition offset;
 		@Nullable
 		private Direction lastDirection;
 
-		public WhereClauseConfiguration()
+		public OffsetMatcherBuilder()
 		{
 			this.offset = new CellPosition();
 			this.lastDirection = null;
 		}
 
-		public WhereClauseConfiguration by(int steps)
+		public OffsetMatcherBuilder by(int steps)
 		{
 			if(this.lastDirection == null)
 				throw new IllegalStateException();
-			this.offset.add(this.lastDirection.getNormal().multiply(steps-1));
+			this.offset.add(this.lastDirection.getNormal().multiply(steps - 1));
 			return this;
 		}
 
-		public WhereClauseConfiguration then(Direction direction)
+		public OffsetMatcherBuilder then(Direction direction)
 		{
 			this.lastDirection = direction;
 			this.offset.add(direction.getNormal());
@@ -103,15 +130,24 @@ public class GrammarRuleFacade {
 			return this.matches(CellMatcher.isSymbol(symbol));
 		}
 
-		public GrammarRuleFacade in(Collection<String> symbols)
+		public GrammarRuleFacade is(Collection<String> symbols)
 		{
 			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(symbols)));
 		}
 
+		public GrammarRuleFacade is_not(String symbol)
+		{
+			return this.matches(CellMatcher.isSymbol(symbol).not());
+		}
+
+		public GrammarRuleFacade is_not(Collection<String> symbols)
+		{
+			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(symbols)).not());
+		}
+
 		public GrammarRuleFacade matches(CellMatcher matcher)
 		{
-			GrammarRuleFacade.this.matcherBuilder.match(this.offset).using(matcher);
-			return GrammarRuleFacade.this;
+			return GrammarRuleFacade.this.and(matcher.offset(this.offset));
 		}
 
 		public GrammarRuleFacade matches(Consumer<CellMatcherEnvironment> action)
