@@ -15,46 +15,19 @@ import javax.annotation.Nullable;
 public class MultiblockExpression implements SymbolExpression {
 	private final Structure struct;
 
-	@Nullable
-	private final ResourceLocation ignoredBlock;
-
-	public MultiblockExpression(Structure struct, @Nullable ResourceLocation ignoredBlock)
+	public MultiblockExpression(Structure struct)
 	{
 		this.struct = struct;
-		this.ignoredBlock = ignoredBlock;
 	}
 
 	@Override
 	public BuildPlan getBuildPlan()
 	{
-		Structure filtered = this.getFilteredStructure();
-		return StagedBuildPlan.of(new ClearAreaForStructurePlan(filtered), new SimpleStructureBuildPlan(filtered));
-	}
-
-	public Structure getFilteredStructure()
-	{
-		return FilteredStructure.filter(this.struct, this::filterStructure);
-	}
-
-	private boolean filterStructure(Structure structure, Vector3ic position)
-	{
-		return this.isExplicitBlock(structure.getBlockAt(position));
-	}
-
-	private boolean isExplicitBlock(BlockState state)
-	{
-		if(this.ignoredBlock == null)
-			return true;
-		return !state.getBlockHolder().getRegisteredName().equals(this.ignoredBlock.toString());
-	}
-
-	public static MultiblockExpression of(Structure structure, @Nullable ResourceLocation ignoredBlock)
-	{
-		return new MultiblockExpression(structure, ignoredBlock);
+		return StagedBuildPlan.of(new ClearAreaForStructurePlan(this.struct), new SimpleStructureBuildPlan(this.struct));
 	}
 
 	public static MultiblockExpression of(Structure structure)
 	{
-		return new MultiblockExpression(structure, null);
+		return new MultiblockExpression(structure);
 	}
 }

@@ -1,5 +1,6 @@
 package dev.enginecrafter77.livelyrealms.generation.loader;
 
+import dev.enginecrafter77.livelyrealms.generation.expression.MultiblockExpression;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpression;
 import dev.enginecrafter77.livelyrealms.generation.expression.SymbolExpressionRegistry;
 import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
@@ -51,20 +52,15 @@ public class ExpressionSetFacade {
 	{
 		try
 		{
-			return LOADER.load(new File(path).toPath());
+			Structure structure = LOADER.load(new File(path).toPath());
+			if(this.ignoredBlock != null)
+				structure = FilteredStructure.filter(structure, new IgnoreBlockStructureFilter(this.ignoredBlock));
+			return structure;
 		}
 		catch(IOException exc)
 		{
 			throw new RuntimeException(exc);
 		}
-	}
-
-	private boolean filterStructure(Structure structure, Vector3ic position)
-	{
-		if(this.ignoredBlock == null)
-			return true;
-		BlockState state = structure.getBlockAt(position);
-		return !Objects.equals(state.getBlockHolder().getRegisteredName(), this.ignoredBlock.toString());
 	}
 
 	public class ExpressionFacade
@@ -82,39 +78,26 @@ public class ExpressionSetFacade {
 			return this;
 		}
 
-		public ExpressionFacade using(BuildPlan plan)
-		{
-			return this.using(() -> plan);
-		}
-
 		public ExpressionFacade using(Structure structure)
 		{
-			return this.using(new StructureExpression(structure));
+			return this.using(MultiblockExpression.of(structure));
 		}
 	}
 
-	private class StructureExpression implements SymbolExpression
+	private static class IgnoreBlockStructureFilter implements FilteredStructure.StructureFilter
 	{
-		private final Structure struct;
-		private final BuildPlan plan;
+		private final ResourceLocation ignoreBlock;
 
-		public StructureExpression(Structure struct)
+		public IgnoreBlockStructureFilter(ResourceLocation ignoreBlock)
 		{
-			this.struct = struct;
-			this.plan = this.createPlan();
+			this.ignoreBlock = ignoreBlock;
 		}
 
-		private BuildPlan createPlan()
-		{
-			Structure filtered = FilteredStructure.filter(this.struct, ExpressionSetFacade.this::filterStructure);
-			return StagedBuildPlan.of(new ClearAreaForStructurePlan(filtered), new SimpleStructureBuildPlan(filtered));
-		}
-
-		@NotNull
 		@Override
-		public BuildPlan getBuildPlan()
+		public boolean blockMatches(Structure structure, Vector3ic position)
 		{
-			return this.plan;
+			BlockState state = structure.getBlockAt(position);
+			return !Objects.equals(state.getBlockHolder().getRegisteredName(), this.ignoreBlock.toString());
 		}
 	}
 }
