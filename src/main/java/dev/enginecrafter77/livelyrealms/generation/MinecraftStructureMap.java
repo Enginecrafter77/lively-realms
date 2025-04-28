@@ -109,6 +109,11 @@ public class MinecraftStructureMap implements GenerationProfileHolder, Generator
 
 	public void expand(ReadableCellPosition cell)
 	{
+		if(this.getTaskTracker().getTask(cell) != null)
+		{
+			return; // Fail silently
+		}
+
 		Grammar grammar = this.getGenerationProfile().grammar();
 		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(this, cell).collect(Collectors.toList());
 		if(rules.isEmpty())

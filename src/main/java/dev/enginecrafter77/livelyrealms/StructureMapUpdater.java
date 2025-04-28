@@ -57,7 +57,7 @@ public class StructureMapUpdater {
 				CellMutationTask task = itr.next();
 				if(task.isDone() && task.validate())
 				{
-					task.commit();
+					task.onFinished();
 					itr.remove();
 					this.markedForUpdate.add(ImmutableCellPosition.copyOf(task.getCellPosition()));
 					data.setDirty();

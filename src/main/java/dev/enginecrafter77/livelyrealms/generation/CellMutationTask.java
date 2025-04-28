@@ -89,10 +89,15 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		this.planInterpreter = null;
 	}
 
-	public void commit()
+	public void onStarted()
 	{
 		this.generatorContext.getSymbolMap().setSymbolAt(this.cellPosition, this.toSymbol);
 		this.dirtyFlagHandler.markDirty();
+	}
+
+	public void onFinished()
+	{
+		//NOOP
 	}
 
 	public boolean isActive()

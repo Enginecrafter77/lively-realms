@@ -54,6 +54,15 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 		return this.allTasks().stream().filter(CellMutationTask::isActive);
 	}
 
+	private CellMutationTask replaceTask(ReadableCellPosition cell, String symbol)
+	{
+		cell = ImmutableCellPosition.copyOf(cell);
+		this.removeTask(cell);
+		CellMutationTask task = CellMutationTask.create(this.context, cell, symbol, this.dirtyFlagHandler);
+		this.registerTask(task);
+		return task;
+	}
+
 	private void acceptSymbol(ReadableCellPosition cell, String symbol)
 	{
 		if(this.context.getSymbolMap().getSymbolAt(cell).equals(symbol))
@@ -66,8 +75,7 @@ public class MapTaskTracker implements INBTSerializable<ListTag> {
 			this.context.getSymbolMap().setSymbolAt(cell, symbol);
 			return;
 		}
-		CellMutationTask task = CellMutationTask.create(this.context, cell, symbol, this.dirtyFlagHandler);
-		this.registerTask(task);
+		this.replaceTask(cell, symbol).onStarted();
 	}
 
 	public SymbolAcceptor mutationAcceptor()
