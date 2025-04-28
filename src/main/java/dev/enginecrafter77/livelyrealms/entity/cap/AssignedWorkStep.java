@@ -9,6 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.server.level.ServerLevel;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -54,16 +56,24 @@ public final class AssignedWorkStep implements BuildContextOwner {
 	}
 
 	public static record WorkStepLocator(UUID mapId, ImmutableCellPosition cell, String symbol, int step) {
+		private static final Logger LOGGER = LoggerFactory.getLogger(WorkStepLocator.class);
+
 		@Nullable
 		public AssignedWorkStep resolve(ServerLevel level)
 		{
 			MinecraftStructureMap map = GenerationGridWorldData.get(level).get(this.mapId);
 			if(map == null)
+			{
+				LOGGER.warn("Resolve: map {} could not be found", this.mapId);
 				return null;
+			}
 			GenerationProfile profile = map.getGenerationProfile();
 			SymbolExpression expression = profile.expressionProvider().getExpression(this.symbol);
 			if(expression == null)
+			{
+				LOGGER.warn("Resolve: expression for symbol {} could not be found", this.symbol);
 				return null;
+			}
 			BuildContext context = new BuildContext(level, map.getCellLocator().getBlockPositionInsideCell(this.cell, BlockPos.ZERO));
 			BuildStep step = expression.getBuildPlan().getStep(this.step);
 			return new AssignedWorkStep(this, context, step);

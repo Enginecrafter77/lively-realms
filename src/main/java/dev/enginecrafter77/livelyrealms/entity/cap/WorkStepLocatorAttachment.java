@@ -43,6 +43,6 @@ public class WorkStepLocatorAttachment implements INBTSerializable<CompoundTag> 
 			this.assignedTaskLocator = null;
 			return;
 		}
-		this.assignedTaskLocator = AssignedWorkStep.WorkStepLocator.deserializeNBT(provider, nbt);
+		this.assignedTaskLocator = AssignedWorkStep.WorkStepLocator.deserializeNBT(provider, nbt.getCompound("assigned_task"));
 	}
 }
