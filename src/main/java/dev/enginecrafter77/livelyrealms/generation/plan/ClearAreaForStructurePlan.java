@@ -7,21 +7,15 @@ import org.joml.Vector3ic;
 
 import java.util.function.Predicate;
 
-public class ClearAreaForStructurePlan extends FilteredStructureBuildPlan {
+public class ClearAreaForStructurePlan extends StructureBuildPlan {
 	public ClearAreaForStructurePlan(Structure structure)
 	{
 		super(structure);
 	}
 
-	public ClearAreaForStructurePlan(Structure structure, Predicate<BlockState> shouldClear)
-	{
-		super(structure, shouldClear);
-	}
-
 	@Override
-	protected BuildStepAction getActionFor(Vector3ic pos)
+	public BuildStepAction getActionFor(Vector3ic pos)
 	{
-		BlockPos destPos = new BlockPos(pos.x(), pos.y(), pos.z());
-		return new ClearForBlockAction(destPos, this.structure.getBlockAt(pos).getBlockState());
+		return new ClearForBlockAction(toBlockPos(pos), this.structure.getBlockAt(pos));
 	}
 }

@@ -22,27 +22,25 @@ public class LitematicaPalettedStructure implements Structure {
     }
 
     @Override
-    public StructureBlock getBlockAt(Vector3ic position)
+    public boolean isBlockDefined(Vector3ic position)
+    {
+        return true;
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity getBlockEntityAt(Vector3ic position)
+    {
+        return null;
+    }
+
+    @Override
+    public BlockState getBlockAt(Vector3ic position)
     {
         int index = this.indexer.toIndex(position);
         int value = this.bitVector.get(index);
         BlockStateProvider provider = this.palette.get(value);
-        return new StructureBlock() {
-            @Override
-            public Vector3ic getPosition() {
-                return position;
-            }
-
-            @Override
-            public BlockState getBlockState() {
-                return provider.getBlockState();
-            }
-
-            @Override
-            public @Nullable BlockEntity getBlockEntity() {
-                return null;
-            }
-        };
+        return provider.getBlockState();
     }
 
     @Override

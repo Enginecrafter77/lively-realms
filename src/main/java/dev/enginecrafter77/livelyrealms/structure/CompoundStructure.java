@@ -1,6 +1,5 @@
 package dev.enginecrafter77.livelyrealms.structure;
 
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -20,34 +19,41 @@ public class CompoundStructure implements Structure {
         this.size = size;
     }
 
-    @Override
-    public StructureBlock getBlockAt(Vector3ic position)
+    @Nullable
+    private OffsetStructure findRegion(Vector3ic position)
     {
         for(OffsetStructure struct : this.structures)
         {
             if(struct.contains(position))
-                return struct.getBlockAt(position);
+                return struct;
         }
-        return new StructureBlock() {
-            @Override
-            public Vector3ic getPosition()
-            {
-                return position;
-            }
+        return null;
+    }
 
-            @Override
-            public BlockState getBlockState()
-            {
-                return Blocks.AIR.defaultBlockState();
-            }
+    @Override
+    public boolean isBlockDefined(Vector3ic position)
+    {
+        OffsetStructure region = this.findRegion(position);
+        return region != null && region.isBlockDefined(position);
+    }
 
-            @Nullable
-            @Override
-            public BlockEntity getBlockEntity()
-            {
-                return null;
-            }
-        };
+    @Override
+    public BlockState getBlockAt(Vector3ic position)
+    {
+        OffsetStructure region = this.findRegion(position);
+        if(region == null)
+            throw new BlockNotDefinedException(this, position);
+        return region.getBlockAt(position);
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity getBlockEntityAt(Vector3ic position)
+    {
+        OffsetStructure region = this.findRegion(position);
+        if(region == null)
+            throw new BlockNotDefinedException(this, position);
+        return region.getBlockEntityAt(position);
     }
 
     @Override
@@ -131,36 +137,46 @@ public class CompoundStructure implements Structure {
 
         public boolean contains(Vector3ic position)
         {
-            Vector3i relativePos = new Vector3i(position);
-            relativePos.sub(this.offset);
-            Vector3ic size = this.getSize();
+            return this.isRelativePositionInBounds(this.relativePosition(position));
+        }
 
-            return relativePos.x >= 0 && relativePos.y >= 0 && relativePos.z >= 0 &&
-                    relativePos.x < size.x() && relativePos.y < size.y() && relativePos.z < size.z();
+        private Vector3i relativePosition(Vector3ic absolutePosition)
+        {
+            Vector3i out = new Vector3i();
+            out.set(absolutePosition);
+            out.sub(this.offset);
+            return out;
+        }
+
+        private boolean isRelativePositionInBounds(Vector3ic relative)
+        {
+            Vector3ic size = this.getSize();
+            return relative.minComponent() >= 0 && relative.x() < size.x() && relative.y() < size.y() && relative.z() < size.z();
         }
 
         @Override
-        public StructureBlock getBlockAt(Vector3ic position) {
-            StructureBlock sup = this.structure.getBlockAt(position);
-            return new StructureBlock() {
-                @Override
-                public Vector3ic getPosition() {
-                    Vector3i pos = new Vector3i(sup.getPosition());
-                    pos.add(offset);
-                    return pos;
-                }
+        public boolean isBlockDefined(Vector3ic position)
+        {
+            return this.contains(position) && this.structure.isBlockDefined(this.relativePosition(position));
+        }
 
-                @Override
-                public BlockState getBlockState()
-                {
-                    return sup.getBlockState();
-                }
+        @Nullable
+        @Override
+        public BlockEntity getBlockEntityAt(Vector3ic position)
+        {
+            Vector3i relative = this.relativePosition(position);
+            if(!this.isRelativePositionInBounds(relative))
+                throw new BlockNotDefinedException(this, position);
+            return this.structure.getBlockEntityAt(relative);
+        }
 
-                @Override
-                public @Nullable BlockEntity getBlockEntity() {
-                    return sup.getBlockEntity();
-                }
-            };
+        @Override
+        public BlockState getBlockAt(Vector3ic position)
+        {
+            Vector3i relative = this.relativePosition(position);
+            if(!this.isRelativePositionInBounds(relative))
+                throw new BlockNotDefinedException(this, position);
+            return this.structure.getBlockAt(relative);
         }
 
         @Override

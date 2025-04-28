@@ -43,31 +43,23 @@ public class PalettedStructure implements Structure {
 	}
 
 	@Override
-	public StructureBlock getBlockAt(Vector3ic position)
+	public boolean isBlockDefined(Vector3ic position)
+	{
+		return true;
+	}
+
+	@Override
+	public BlockState getBlockAt(Vector3ic position)
 	{
 		char symbol = this.map[this.getIndexFromPosition(position)];
-		BlockState state = this.palette.getOrDefault(symbol, Blocks.AIR.defaultBlockState());
-		Vector3i immPos = new Vector3i(position);
-		return new StructureBlock() {
-			@Override
-			public Vector3ic getPosition()
-			{
-				return immPos;
-			}
+		return this.palette.getOrDefault(symbol, Blocks.AIR.defaultBlockState());
+	}
 
-			@Override
-			public BlockState getBlockState()
-			{
-				return state;
-			}
-
-			@Nullable
-			@Override
-			public BlockEntity getBlockEntity()
-			{
-				return null;
-			}
-		};
+	@Nullable
+	@Override
+	public BlockEntity getBlockEntityAt(Vector3ic position)
+	{
+		return null;
 	}
 
 	public static PalettedStructure fromJson(File source)

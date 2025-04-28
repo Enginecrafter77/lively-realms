@@ -39,8 +39,7 @@ public class ConjureStructureAction extends BuildStepAction {
 		for(BlockPos pos : this.structureSpace())
 		{
 			vPos.set(pos.getX(), pos.getY(), pos.getZ());
-			Structure.StructureBlock block = this.structure.getBlockAt(vPos);
-			context.setBlockAndUpdate(pos, block.getBlockState());
+			context.setBlockAndUpdate(pos, this.structure.getBlockAt(vPos));
 		}
 	}
 
@@ -52,9 +51,8 @@ public class ConjureStructureAction extends BuildStepAction {
 		for(BlockPos pos : this.structureSpace())
 		{
 			vPos.set(pos.getX(), pos.getY(), pos.getZ());
-			Structure.StructureBlock block = this.structure.getBlockAt(vPos);
 			BlockState state = context.getBlockState(pos);
-			if(!Objects.equals(state, block.getBlockState()))
+			if(!Objects.equals(state, this.structure.getBlockAt(vPos)))
 				return false;
 		}
 		return true;

@@ -7,14 +7,12 @@ import org.joml.Vector3ic;
 import javax.annotation.Nullable;
 
 public interface Structure {
-	public StructureBlock getBlockAt(Vector3ic position);
-	public Vector3ic getSize();
+	public boolean isBlockDefined(Vector3ic position);
 
-	public static interface StructureBlock
-	{
-		public Vector3ic getPosition();
-		public BlockState getBlockState();
-		@Nullable
-		public BlockEntity getBlockEntity();
-	}
+	public BlockState getBlockAt(Vector3ic position);
+
+	@Nullable
+	public BlockEntity getBlockEntityAt(Vector3ic position);
+
+	public Vector3ic getSize();
 }

@@ -8,21 +8,15 @@ import org.joml.Vector3ic;
 
 import java.util.function.Predicate;
 
-public class SimpleStructureBuildPlan extends FilteredStructureBuildPlan {
-	public SimpleStructureBuildPlan(Structure structure, Predicate<BlockState> predicate)
-	{
-		super(structure, predicate);
-	}
-
+public class SimpleStructureBuildPlan extends StructureBuildPlan {
 	public SimpleStructureBuildPlan(Structure structure)
 	{
 		super(structure);
 	}
 
 	@Override
-	protected BuildStepAction getActionFor(Vector3ic position)
+	public BuildStepAction getActionFor(Vector3ic position)
 	{
-		BlockPos pos = new BlockPos(position.x(), position.y(), position.z());
-		return new PlaceBlockAction(pos, this.structure.getBlockAt(position).getBlockState());
+		return new PlaceBlockAction(toBlockPos(position), this.structure.getBlockAt(position));
 	}
 }

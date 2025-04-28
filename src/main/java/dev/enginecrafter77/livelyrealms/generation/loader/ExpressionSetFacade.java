@@ -6,15 +6,18 @@ import dev.enginecrafter77.livelyrealms.generation.plan.BuildPlan;
 import dev.enginecrafter77.livelyrealms.generation.plan.ClearAreaForStructurePlan;
 import dev.enginecrafter77.livelyrealms.generation.plan.SimpleStructureBuildPlan;
 import dev.enginecrafter77.livelyrealms.generation.plan.StagedBuildPlan;
+import dev.enginecrafter77.livelyrealms.structure.FilteredStructure;
 import dev.enginecrafter77.livelyrealms.structure.LitematicaStructureLoader;
 import dev.enginecrafter77.livelyrealms.structure.Structure;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3ic;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class ExpressionSetFacade {
 	private static final LitematicaStructureLoader LOADER = new LitematicaStructureLoader();
@@ -26,7 +29,7 @@ public class ExpressionSetFacade {
 	public ExpressionSetFacade(SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder)
 	{
 		this.builder = builder;
-		this.ignoredBlock = ResourceLocation.fromNamespaceAndPath("minecraft", "bedrock");
+		this.ignoredBlock = null;
 	}
 
 	public void cellSize(int cellSize)
@@ -56,6 +59,14 @@ public class ExpressionSetFacade {
 		}
 	}
 
+	private boolean filterStructure(Structure structure, Vector3ic position)
+	{
+		if(this.ignoredBlock == null)
+			return true;
+		BlockState state = structure.getBlockAt(position);
+		return !Objects.equals(state.getBlockHolder().getRegisteredName(), this.ignoredBlock.toString());
+	}
+
 	public class ExpressionFacade
 	{
 		private final String symbol;
@@ -65,19 +76,20 @@ public class ExpressionSetFacade {
 			this.symbol = symbol;
 		}
 
-		public void using(SymbolExpression expression)
+		public ExpressionFacade using(SymbolExpression expression)
 		{
 			ExpressionSetFacade.this.builder.express(this.symbol, expression);
+			return this;
 		}
 
-		public void using(BuildPlan plan)
+		public ExpressionFacade using(BuildPlan plan)
 		{
-			this.using(() -> plan);
+			return this.using(() -> plan);
 		}
 
-		public void using(Structure structure)
+		public ExpressionFacade using(Structure structure)
 		{
-			this.using(new StructureExpression(structure));
+			return this.using(new StructureExpression(structure));
 		}
 	}
 
@@ -94,7 +106,8 @@ public class ExpressionSetFacade {
 
 		private BuildPlan createPlan()
 		{
-			return StagedBuildPlan.of(new ClearAreaForStructurePlan(this.struct, this::isExplicitBlock), new SimpleStructureBuildPlan(this.struct, this::isExplicitBlock));
+			Structure filtered = FilteredStructure.filter(this.struct, ExpressionSetFacade.this::filterStructure);
+			return StagedBuildPlan.of(new ClearAreaForStructurePlan(filtered), new SimpleStructureBuildPlan(filtered));
 		}
 
 		@NotNull
@@ -102,13 +115,6 @@ public class ExpressionSetFacade {
 		public BuildPlan getBuildPlan()
 		{
 			return this.plan;
-		}
-
-		private boolean isExplicitBlock(BlockState state)
-		{
-			if(ignoredBlock == null)
-				return true;
-			return !state.getBlockHolder().getRegisteredName().equals(ignoredBlock.toString());
 		}
 	}
 }
