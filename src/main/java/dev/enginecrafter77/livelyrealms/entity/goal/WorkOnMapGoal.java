@@ -18,8 +18,6 @@ import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
 public class WorkOnMapGoal extends Goal {
-	private static final Logger LOGGER = LogManager.getLogger(WorkOnMapGoal.class);
-
 	private final PathfinderMob entity;
 	private final Vector3d hotspot;
 
@@ -71,7 +69,6 @@ public class WorkOnMapGoal extends Goal {
 		{
 			holder.setAssignedStep(null);
 			this.state = State.DONE;
-			LOGGER.info("Work already done, skipping step");
 			return;
 		}
 
@@ -84,8 +81,7 @@ public class WorkOnMapGoal extends Goal {
 				if(!this.entity.getNavigation().isInProgress())
 				{
 					this.entity.getNavigation().setMaxVisitedNodesMultiplier(10F);
-					boolean found = this.entity.getNavigation().moveTo(this.hotspot.x, this.hotspot.y, this.hotspot.z, (int)Math.floor(activationDistance), this.entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
-					LOGGER.info("Entered new path into pathfinder. Found? {}", found);
+					this.entity.getNavigation().moveTo(this.hotspot.x, this.hotspot.y, this.hotspot.z, (int)Math.floor(activationDistance), this.entity.getAttributeValue(Attributes.MOVEMENT_SPEED));
 				}
 				if(this.entity.getNavigation().isDone())
 				{
@@ -93,7 +89,6 @@ public class WorkOnMapGoal extends Goal {
 					this.entity.getNavigation().resetMaxVisitedNodesMultiplier();
 					this.workTicks = 0;
 					this.state = State.WORKING;
-					LOGGER.info("Moved to hotspot, starting work...");
 				}
 			}
 			else
@@ -109,7 +104,6 @@ public class WorkOnMapGoal extends Goal {
 				holder.setAssignedStep(null);
 				this.state = State.DONE;
 				this.entity.swing(InteractionHand.MAIN_HAND);
-				LOGGER.info("Work finished");
 			}
 		}
 	}
