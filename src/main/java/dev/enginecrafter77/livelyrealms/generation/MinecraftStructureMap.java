@@ -1,6 +1,8 @@
 package dev.enginecrafter77.livelyrealms.generation;
 
 import dev.enginecrafter77.livelyrealms.LivelyRealmsMod;
+import dev.enginecrafter77.livelyrealms.RandomRuleSelector;
+import dev.enginecrafter77.livelyrealms.RuleSelector;
 import dev.enginecrafter77.livelyrealms.generation.expression.CellLocator;
 import dev.enginecrafter77.livelyrealms.generation.expression.ContinuousCellLocator;
 import net.minecraft.core.BlockPos;
@@ -13,7 +15,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MinecraftStructureMap implements GenerationProfileHolder, GeneratorContext, INBTSerializable<CompoundTag>, DirtyFlagHandler {
 	public static final String EPSILON = "epsilon";
@@ -101,6 +105,27 @@ public class MinecraftStructureMap implements GenerationProfileHolder, Generator
 	public GenerationProfile getGenerationProfile()
 	{
 		return LivelyRealmsMod.GENERATION_PROFILE_REGISTRY.getOptional(this.profileName).orElseThrow();
+	}
+
+	public void expand(ReadableCellPosition cell)
+	{
+		Grammar grammar = this.getGenerationProfile().grammar();
+		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(this, cell).collect(Collectors.toList());
+		if(rules.isEmpty())
+			return;
+		Grammar.GrammarRuleEntry selectedRule = rules.getFirst();
+		if(rules.size() >= 2)
+		{
+			RuleSelector selector = grammar.ruleSelector().or(new RandomRuleSelector());
+			int ruleIndex = selector.select(this, cell, rules);
+			if(ruleIndex == -1)
+				return;
+			selectedRule = rules.get(ruleIndex);
+		}
+
+		SymbolAcceptor acceptor = this.getTaskTracker().mutationAcceptor();
+		selectedRule.rule().apply(acceptor, this, cell);
+		this.markDirty();
 	}
 
 	protected void invalidateCachedObjects()

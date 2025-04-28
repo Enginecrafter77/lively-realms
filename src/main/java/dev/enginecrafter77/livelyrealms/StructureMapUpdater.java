@@ -9,40 +9,17 @@ import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StructureMapUpdater {
-	private final List<ReadableCellPosition> markedForUpdate;
+	private static final Comparator<ReadableCellPosition> POSITION_COMPARATOR = Comparator.comparingInt(ReadableCellPosition::y).thenComparingInt(ReadableCellPosition::z).thenComparingInt(ReadableCellPosition::x);
+	private final Set<ImmutableCellPosition> markedForUpdate;
 
 	public StructureMapUpdater()
 	{
-		this.markedForUpdate = new ArrayList<ReadableCellPosition>();
-	}
-
-	public void expand(MinecraftStructureMap map, ReadableCellPosition cell)
-	{
-		Grammar grammar = map.getGenerationProfile().grammar();
-		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(map, cell).collect(Collectors.toList());
-		if(rules.isEmpty())
-			return;
-		Grammar.GrammarRuleEntry selectedRule = rules.getFirst();
-		if(rules.size() >= 2)
-		{
-			RuleSelector selector = grammar.ruleSelector().or(new RandomRuleSelector());
-			int ruleIndex = selector.select(map, cell, rules);
-			if(ruleIndex == -1)
-				return;
-			selectedRule = rules.get(ruleIndex);
-		}
-
-		SymbolAcceptor acceptor = map.getTaskTracker().mutationAcceptor();
-		selectedRule.rule().apply(acceptor, map, cell);
-		map.markDirty();
+		this.markedForUpdate = new TreeSet<ImmutableCellPosition>(POSITION_COMPARATOR);
 	}
 
 	public Collection<ReadableCellPosition> getNeighborhood(ReadableCellPosition cell)
@@ -61,7 +38,7 @@ public class StructureMapUpdater {
 	public void expandNeighbors(MinecraftStructureMap map, ReadableCellPosition cell)
 	{
 		for(ReadableCellPosition neighbor : this.getNeighborhood(cell))
-			this.expand(map, neighbor);
+			map.expand(neighbor);
 	}
 
 	@SubscribeEvent
@@ -82,7 +59,7 @@ public class StructureMapUpdater {
 				{
 					task.commit();
 					itr.remove();
-					this.markedForUpdate.add(task.getCellPosition());
+					this.markedForUpdate.add(ImmutableCellPosition.copyOf(task.getCellPosition()));
 					data.setDirty();
 				}
 			}
