@@ -8,10 +8,12 @@ import net.minecraft.resources.ResourceLocation;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.function.Function;
 
 public class GenerationProfileLoader {
-	public static final String PROFILE_FILE_EXTENSION = ".lrg";
+	public static final String PROFILE_FILE_EXTENSION = "gp";
 
 	private final CompilerConfiguration compilerConfiguration;
 
@@ -26,9 +28,15 @@ public class GenerationProfileLoader {
 		return new GroovyShell(this.getClass().getClassLoader(), this.compilerConfiguration);
 	}
 
+	public Path getScriptPath(ResourceLocation scriptKey)
+	{
+		String filePath = String.format("structures/%s/%s/structure.%s", scriptKey.getNamespace(), scriptKey.getPath(), PROFILE_FILE_EXTENSION);
+		return (new File(filePath)).toPath();
+	}
+
 	public Reader openScript(ResourceLocation scriptKey) throws IOException
 	{
-		return new FileReader(scriptKey.getPath() + PROFILE_FILE_EXTENSION);
+		return Files.newBufferedReader(this.getScriptPath(scriptKey));
 	}
 
 	public Script loadScript(ResourceLocation scriptKey) throws IOException
@@ -36,14 +44,15 @@ public class GenerationProfileLoader {
 		try(Reader scriptReader = this.openScript(scriptKey))
 		{
 			GroovyShell shell = this.createShell();
-			File file = new File(scriptKey.getPath());
-			return shell.parse(scriptReader, file.getName());
+			return shell.parse(scriptReader, scriptKey.getPath());
 		}
 	}
 
 	public GenerationProfile loadProfile(ResourceLocation scriptKey) throws IOException
 	{
 		Script script = this.loadScript(scriptKey);
+		Path directory = this.getScriptPath(scriptKey).getParent();
+		script.setProperty(GrammarConfigurationScript.PROPERTY_DIRECTORY, directory);
 		return (GenerationProfile)script.run();
 	}
 

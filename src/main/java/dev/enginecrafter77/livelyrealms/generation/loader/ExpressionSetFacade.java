@@ -18,17 +18,21 @@ import org.joml.Vector3ic;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class ExpressionSetFacade {
 	private static final LitematicaStructureLoader LOADER = new LitematicaStructureLoader();
 
 	private final SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder;
+	private final Path directoryIn;
+
 	@Nullable
 	private ResourceLocation ignoredBlock;
 
-	public ExpressionSetFacade(SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder)
+	public ExpressionSetFacade(Path directoryIn, SymbolExpressionRegistry.SymbolExpressionRegistryBuilder builder)
 	{
+		this.directoryIn = directoryIn;
 		this.builder = builder;
 		this.ignoredBlock = null;
 	}
@@ -52,7 +56,8 @@ public class ExpressionSetFacade {
 	{
 		try
 		{
-			Structure structure = LOADER.load(new File(path).toPath());
+			Path structureFile = this.directoryIn.resolve(path);
+			Structure structure = LOADER.load(structureFile);
 			if(this.ignoredBlock != null)
 				structure = FilteredStructure.filter(structure, new IgnoreBlockStructureFilter(this.ignoredBlock));
 			return structure;
@@ -84,15 +89,8 @@ public class ExpressionSetFacade {
 		}
 	}
 
-	private static class IgnoreBlockStructureFilter implements FilteredStructure.StructureFilter
+	private record IgnoreBlockStructureFilter(ResourceLocation ignoreBlock) implements FilteredStructure.StructureFilter
 	{
-		private final ResourceLocation ignoreBlock;
-
-		public IgnoreBlockStructureFilter(ResourceLocation ignoreBlock)
-		{
-			this.ignoreBlock = ignoreBlock;
-		}
-
 		@Override
 		public boolean blockMatches(Structure structure, Vector3ic position)
 		{

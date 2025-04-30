@@ -7,7 +7,11 @@ import groovy.lang.Closure;
 import groovy.lang.DelegatesTo;
 import groovy.lang.Script;
 
+import java.nio.file.Path;
+
 public abstract class GrammarConfigurationScript extends Script {
+	public static final String PROPERTY_DIRECTORY = "structure_directory";
+
 	private final Grammar.GrammarBuilder grammarBuilder;
 	private final SymbolExpressionRegistry.SymbolExpressionRegistryBuilder expressionRegistryBuilder;
 
@@ -34,7 +38,8 @@ public abstract class GrammarConfigurationScript extends Script {
 
 	public void expressions(@DelegatesTo(ExpressionSetFacade.class) Closure<?> closure)
 	{
-		closure.setDelegate(new ExpressionSetFacade(this.expressionRegistryBuilder));
+		Path directory = (Path)this.getProperty(PROPERTY_DIRECTORY);
+		closure.setDelegate(new ExpressionSetFacade(directory, this.expressionRegistryBuilder));
 		closure.run();
 	}
 }
