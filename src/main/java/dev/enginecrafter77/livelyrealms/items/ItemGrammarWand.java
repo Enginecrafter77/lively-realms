@@ -51,7 +51,8 @@ public class ItemGrammarWand extends Item {
 
 			CellPosition position = new CellPosition();
 			map.getCellLocator().getEnclosingCell(context.getClickedPos(), position);
-			map.getSymbolMap().setSymbolAt(position, map.getGenerationProfile().grammar().startingSymbol());
+			map.getTaskTracker().mutationAcceptor().acceptSymbol(position, map.getGenerationProfile().grammar().startingSymbol());
+			return InteractionResult.SUCCESS;
 		}
 
 		Grammar grammar = map.getGenerationProfile().grammar();
