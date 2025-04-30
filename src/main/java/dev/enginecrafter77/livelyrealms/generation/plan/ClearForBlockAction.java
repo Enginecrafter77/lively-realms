@@ -18,7 +18,7 @@ public class ClearForBlockAction extends PlaceBlockAction {
 	@Override
 	public void perform(BuildContext context)
 	{
-		context.setBlockAndUpdate(this.relativePosition, Blocks.AIR.defaultBlockState());
+		context.breakBlock(this.relativePosition);
 	}
 
 	@Override

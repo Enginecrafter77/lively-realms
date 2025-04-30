@@ -16,6 +16,11 @@ public record BuildContext(Level level, BlockPos anchor) {
 		this.level.setBlockAndUpdate(this.getWorldPosition(relativePosition), state);
 	}
 
+	public void breakBlock(Vec3i relativePosition)
+	{
+		this.level.destroyBlock(this.getWorldPosition(relativePosition), false);
+	}
+
 	public BlockPos getWorldPosition(Vec3i relativePosition)
 	{
 		return this.anchor.offset(relativePosition);
