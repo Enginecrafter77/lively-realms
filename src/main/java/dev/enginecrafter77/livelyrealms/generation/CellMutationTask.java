@@ -112,16 +112,7 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 
 	public boolean validate()
 	{
-		if(!this.isDone())
-			return false;
-		ContextAwarePlanInterpreter newInterpreter = new ContextAwarePlanInterpreter(this.getPlan(), this);
-		if(newInterpreter.hasNextStep())
-		{
-			this.planInterpreter = newInterpreter;
-			this.dirtyFlagHandler.markDirty();
-			return false;
-		}
-		return true;
+		return this.isDone(); // Skip validation...
 	}
 
 	@Override
