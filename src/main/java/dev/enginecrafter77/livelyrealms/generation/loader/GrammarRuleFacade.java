@@ -125,24 +125,14 @@ public class GrammarRuleFacade {
 			return this;
 		}
 
-		public GrammarRuleFacade is(String symbol)
+		public GrammarRuleFacade is(String bundle)
 		{
-			return this.matches(CellMatcher.isSymbol(symbol));
+			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(bundle.split("\\|"))));
 		}
 
-		public GrammarRuleFacade is(Collection<String> symbols)
+		public GrammarRuleFacade is_not(String bundle)
 		{
-			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(symbols)));
-		}
-
-		public GrammarRuleFacade is_not(String symbol)
-		{
-			return this.matches(CellMatcher.isSymbol(symbol).not());
-		}
-
-		public GrammarRuleFacade is_not(Collection<String> symbols)
-		{
-			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(symbols)).not());
+			return this.matches(CellMatcher.isSymbolIn(ImmutableSet.copyOf(bundle.split("\\|"))).not());
 		}
 
 		public GrammarRuleFacade matches(CellMatcher matcher)
