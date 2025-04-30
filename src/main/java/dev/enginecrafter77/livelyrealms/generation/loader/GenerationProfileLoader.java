@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.function.Function;
 
 public class GenerationProfileLoader {
-	public static final String PROFILE_FILE_EXTENSION = "gp";
+	public static final String PROFILE_FILE_EXTENSION = "lgp";
 
 	private final CompilerConfiguration compilerConfiguration;
 
