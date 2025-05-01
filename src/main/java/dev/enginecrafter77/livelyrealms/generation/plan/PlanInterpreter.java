@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 public interface PlanInterpreter extends PersistentStateHolder {
 	public boolean hasNextStep();
 	public BuildStep nextStep();
+	public boolean isDone();
 
 	@Nullable
 	public BuildStep lastStep();

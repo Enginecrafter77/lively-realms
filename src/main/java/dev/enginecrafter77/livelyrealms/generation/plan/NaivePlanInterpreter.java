@@ -35,6 +35,12 @@ public class NaivePlanInterpreter implements PlanInterpreter {
 	}
 
 	@Override
+	public boolean isDone()
+	{
+		return this.nextStep == this.plan.getStepCount();
+	}
+
+	@Override
 	public void saveState(CompoundTag tag)
 	{
 		tag.putInt("step", this.nextStep);

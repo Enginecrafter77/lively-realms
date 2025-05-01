@@ -3,6 +3,8 @@ package dev.enginecrafter77.livelyrealms.generation.plan;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.NoSuchElementException;
+
 public abstract class JumpingPlanInterpreter implements PlanInterpreter {
 	private final BuildPlan plan;
 
@@ -29,7 +31,7 @@ public abstract class JumpingPlanInterpreter implements PlanInterpreter {
 			if(this.isStepAcceptable(this.plan.getStep(nextStep)))
 				return nextStep;
 		}
-		return this.plan.getStepCount();
+		return this.plan.getStepCount(); // we're done
 	}
 
 	private void invalidateNextStep()
@@ -57,8 +59,16 @@ public abstract class JumpingPlanInterpreter implements PlanInterpreter {
 	}
 
 	@Override
+	public boolean isDone()
+	{
+		return this.getNextStepIndex() == this.plan.getStepCount();
+	}
+
+	@Override
 	public BuildStep nextStep()
 	{
+		if(!this.hasNextStep())
+			throw new NoSuchElementException();
 		this.lastStepRef = this.plan.getStep(this.getNextStepIndex());
 		this.rotateStepIndices();
 		return this.lastStepRef;

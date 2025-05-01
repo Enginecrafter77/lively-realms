@@ -102,12 +102,12 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 
 	public boolean isActive()
 	{
-		return this.getPlanInterpreter().hasNextStep();
+		return !this.isDone();
 	}
 
 	public boolean isDone()
 	{
-		return !this.isActive();
+		return this.getPlanInterpreter().isDone();
 	}
 
 	public boolean validate()
@@ -170,6 +170,12 @@ public class CellMutationTask implements INBTSerializable<CompoundTag>, BuildCon
 		public @Nullable BuildStep lastStep()
 		{
 			return this.delegated.lastStep();
+		}
+
+		@Override
+		public boolean isDone()
+		{
+			return this.delegated.isDone();
 		}
 
 		@Override
