@@ -38,6 +38,11 @@ public record Grammar(Set<GrammarRuleEntry> rules, String startingSymbol, RuleSe
 		{
 			return GrammarRuleEntry::isNamed;
 		}
+
+		public static Predicate<GrammarRuleEntry> named(String name)
+		{
+			return r -> Objects.equals(r.name, name);
+		}
 	}
 
 	public static class GrammarBuilder

@@ -6,6 +6,7 @@ import dev.enginecrafter77.livelyrealms.generation.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WeightedRandomSelector implements RuleSelector {
 	private final List<SelectorSet> selectorSets;
@@ -17,17 +18,26 @@ public class WeightedRandomSelector implements RuleSelector {
 		this.rng = rng;
 	}
 
+	@Nullable
 	@Override
-	public int select(GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+	public GrammarRule select(GeneratorContext context, ReadableCellPosition expansionFor, Set<Grammar.GrammarRuleEntry> availableRules)
 	{
-		List<String> ruleNames = availableRules.stream().filter(Grammar.GrammarRuleEntry::isNamed).map(Grammar.GrammarRuleEntry::name).toList();
+		Set<String> ruleNames = availableRules.stream()
+				.filter(Grammar.GrammarRuleEntry::isNamed)
+				.map(Grammar.GrammarRuleEntry::name)
+				.collect(Collectors.toUnmodifiableSet());
 		SelectorSet set = this.selectorSets.stream()
 				.filter(s -> s.matches(ruleNames))
 				.findFirst()
 				.orElse(null);
 		if(set == null)
-			return -1;
-		return set.select(ruleNames, this.rng);
+			return null;
+		String selectedName = set.select(ruleNames, this.rng);
+		return availableRules.stream()
+				.filter(r -> Objects.equals(selectedName, r.name()))
+				.findFirst()
+				.map(Grammar.GrammarRuleEntry::rule)
+				.orElse(null);
 	}
 
 	public static WeightedRandomSelectorBuilder builder()
@@ -39,16 +49,15 @@ public class WeightedRandomSelector implements RuleSelector {
 	{
 		public static final Comparator<SelectorSet> BY_PRIORITY = Comparator.comparing(SelectorSet::priority);
 
-		public boolean matches(Collection<String> options)
+		public boolean matches(Set<String> options)
 		{
-			return Objects.equals(ImmutableSet.copyOf(options), ImmutableSet.copyOf(this.weightMap.options()));
+			return this.weightMap.options().containsAll(options) && options.containsAll(this.weightMap.options());
 		}
 
-		public int select(List<String> options, Random rng)
+		public String select(Set<String> options, Random rng)
 		{
 			double num = rng.nextDouble();
-			String option = this.weightMap.at(num);
-			return options.indexOf(option);
+			return this.weightMap.at(num);
 		}
 	}
 

@@ -3,65 +3,48 @@ package dev.enginecrafter77.livelyrealms.generation.loader;
 import dev.enginecrafter77.livelyrealms.RuleSelector;
 import dev.enginecrafter77.livelyrealms.generation.GeneratorContext;
 import dev.enginecrafter77.livelyrealms.generation.Grammar;
+import dev.enginecrafter77.livelyrealms.generation.GrammarRule;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class RuleSelectorEnvironment {
 	public final GeneratorContext context;
 	public final ReadableCellPosition position;
-	public final List<Grammar.GrammarRuleEntry> rules;
+	public final Set<Grammar.GrammarRuleEntry> rules;
 
-	private int selected;
+	@Nullable
+	private GrammarRule selected;
 
-	public RuleSelectorEnvironment(GeneratorContext context, ReadableCellPosition position, List<Grammar.GrammarRuleEntry> rules)
+	public RuleSelectorEnvironment(GeneratorContext context, ReadableCellPosition position, Set<Grammar.GrammarRuleEntry> rules)
 	{
 		this.context = context;
 		this.position = position;
 		this.rules = rules;
-		this.selected = -1;
-	}
-
-	public void select(int index)
-	{
-		if(index < 0 || index >= this.rules.size())
-			throw new IllegalArgumentException("Cannot select index <0 or >N");
-		this.selected = index;
+		this.selected = null;
 	}
 
 	public void reset()
 	{
-		this.selected = -1;
+		this.selected = null;
 	}
 
 	public void select(String name)
 	{
-		for(int index = 0; index < this.rules.size(); ++index)
-		{
-			Grammar.GrammarRuleEntry entry = this.rules.get(index);
-			if(Objects.equals(entry.name(), name))
-			{
-				this.select(index);
-				return;
-			}
-		}
-		this.reset();
+		this.selected = this.rules.stream()
+				.filter(Grammar.GrammarRuleEntry.named(name))
+				.map(Grammar.GrammarRuleEntry::rule)
+				.findAny()
+				.orElse(null);
 	}
 
 	public void select(Grammar.GrammarRuleEntry rule)
 	{
-		for(int index = 0; index < this.rules.size(); ++index)
-		{
-			Grammar.GrammarRuleEntry entry = this.rules.get(index);
-			if(entry == rule) // intentional identity check
-			{
-				this.select(index);
-				return;
-			}
-		}
-		this.reset();
+		if(!this.rules.contains(rule))
+			throw new IllegalArgumentException("Cannot select rule outside of allowed rules!");
+		this.selected = rule.rule();
 	}
 
 	static RuleSelector wrap(Consumer<RuleSelectorEnvironment> action)
@@ -78,8 +61,9 @@ public class RuleSelectorEnvironment {
 			this.action = action;
 		}
 
+		@Nullable
 		@Override
-		public int select(GeneratorContext context, ReadableCellPosition expansionFor, List<Grammar.GrammarRuleEntry> availableRules)
+		public GrammarRule select(GeneratorContext context, ReadableCellPosition expansionFor, Set<Grammar.GrammarRuleEntry> availableRules)
 		{
 			RuleSelectorEnvironment delegate = new RuleSelectorEnvironment(context, expansionFor, availableRules);
 			this.action.accept(delegate);
