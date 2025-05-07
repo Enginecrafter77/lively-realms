@@ -7,8 +7,11 @@ import dev.enginecrafter77.livelyrealms.generation.GrammarRule;
 import dev.enginecrafter77.livelyrealms.generation.ReadableCellPosition;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RuleSelectorEnvironment {
 	public final GeneratorContext context;
@@ -24,6 +27,31 @@ public class RuleSelectorEnvironment {
 		this.position = position;
 		this.rules = rules;
 		this.selected = null;
+	}
+
+	private Stream<String> ruleNames()
+	{
+		return this.rules.stream().map(Grammar.GrammarRuleEntry::name).filter(Objects::nonNull);
+	}
+
+	public boolean isSelectingFrom(String... ruleNames)
+	{
+		return this.isSelectingFrom(Arrays.asList(ruleNames));
+	}
+
+	public boolean isSelectingFrom(Collection<String> ruleNames)
+	{
+		if(this.rules.stream().anyMatch(Predicate.not(Grammar.GrammarRuleEntry.named())))
+			return false;
+
+		Set<String> queriedNames = new HashSet<>(ruleNames);
+		Set<String> names = this.ruleNames().collect(Collectors.toUnmodifiableSet());
+		return queriedNames.containsAll(names) && names.containsAll(queriedNames);
+	}
+
+	public boolean hasOption(String name)
+	{
+		return this.ruleNames().anyMatch(n -> Objects.equals(n, name));
 	}
 
 	public void reset()
