@@ -29,6 +29,21 @@ public class CellMatcherEnvironment {
 		this.matches = false;
 	}
 
+	public void matchOnlyIf(boolean expr)
+	{
+		this.matches = expr;
+	}
+
+	public void matchIf(boolean expr)
+	{
+		if(expr) this.match();
+	}
+
+	public void unmatchIf(boolean expr)
+	{
+		if(expr) this.unmatch();
+	}
+
 	static CellMatcher wrap(Consumer<CellMatcherEnvironment> action)
 	{
 		return new CellMatcher() {
