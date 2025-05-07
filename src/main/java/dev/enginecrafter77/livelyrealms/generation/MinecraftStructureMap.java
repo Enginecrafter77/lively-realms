@@ -16,6 +16,7 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -107,30 +108,33 @@ public class MinecraftStructureMap implements GenerationProfileHolder, Generator
 		return LivelyRealmsMod.GENERATION_PROFILE_REGISTRY.getOptional(this.profileName).orElseThrow();
 	}
 
-	public void expand(ReadableCellPosition cell)
+	public void seed(ReadableCellPosition cell)
+	{
+		this.getTaskTracker().mutationAcceptor().acceptSymbol(cell, this.getGenerationProfile().grammar().startingSymbol());
+	}
+
+	public ExpandResult expand(ReadableCellPosition cell)
 	{
 		if(this.getTaskTracker().getTask(cell) != null)
-		{
-			return; // Fail silently
-		}
+			return ExpandResult.TASK_PENDING;
 
 		Grammar grammar = this.getGenerationProfile().grammar();
-		List<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(this, cell).collect(Collectors.toList());
+		Set<Grammar.GrammarRuleEntry> rules = grammar.findApplicableRules(this, cell).collect(Collectors.toUnmodifiableSet());
 		if(rules.isEmpty())
-			return;
-		Grammar.GrammarRuleEntry selectedRule = rules.getFirst();
+			return ExpandResult.NO_RULE;
+		GrammarRule selectedRule = rules.stream().map(Grammar.GrammarRuleEntry::rule).findAny().orElseThrow();
 		if(rules.size() >= 2)
 		{
 			RuleSelector selector = grammar.ruleSelector().or(new RandomRuleSelector());
-			int ruleIndex = selector.select(this, cell, rules);
-			if(ruleIndex == -1)
-				return;
-			selectedRule = rules.get(ruleIndex);
+			selectedRule = selector.select(this, cell, rules);
+			if(selectedRule == null)
+				return ExpandResult.SELECTOR_FAILED;
 		}
 
 		SymbolAcceptor acceptor = this.getTaskTracker().mutationAcceptor();
-		selectedRule.rule().apply(acceptor, this, cell);
+		selectedRule.apply(acceptor, this, cell);
 		this.markDirty();
+		return ExpandResult.SUCCESS;
 	}
 
 	protected void invalidateCachedObjects()
@@ -170,4 +174,6 @@ public class MinecraftStructureMap implements GenerationProfileHolder, Generator
 		map.profileName = profile;
 		return map;
 	}
+
+	public static enum ExpandResult {SUCCESS, TASK_PENDING, NO_RULE, SELECTOR_FAILED}
 }
