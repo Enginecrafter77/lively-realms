@@ -13,7 +13,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class DwarfRenderer extends MobRenderer<EntityDwarf, ModelHumanoidDwarf> {
-	public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/player/slim/steve.png");
+	public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(LivelyRealmsMod.MODID, "textures/entity/dwarf.png");
 
 	public DwarfRenderer(EntityRendererProvider.Context context)
 	{
