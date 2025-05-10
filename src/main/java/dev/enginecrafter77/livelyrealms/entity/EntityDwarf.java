@@ -60,6 +60,12 @@ public class EntityDwarf extends PathfinderMob {
 	}
 
 	@Override
+	public boolean removeWhenFarAway(double distanceToClosestPlayer)
+	{
+		return false;
+	}
+
+	@Override
 	public Iterable<ItemStack> getHandSlots()
 	{
 		return ImmutableList.of(this.getItemBySlot(EquipmentSlot.MAINHAND), this.getItemBySlot(EquipmentSlot.OFFHAND));
